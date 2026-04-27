@@ -60,3 +60,7 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+.env.local
+backend/.venv/
+backend/__pycache__/
+backend/.pytest_cache/
