@@ -209,6 +209,53 @@ Prompt templates are fetched from the PromptTemplate table — never hardcoded.
 
 ---
 
+## Project management — how work is structured
+
+Full details in docs/PROJECT_MANAGEMENT.md. Summary for every session:
+
+**Sprint model:** One-week Scrum sprints. Potentially shippable increment every Friday.
+
+**Your team:** Backend, iOS, Infrastructure, or UX/Design. Every story belongs to one team.
+
+**Your workflow every session:**
+1. Read CLAUDE.md (this file) — full briefing, no skipping
+2. Read the assigned GitHub Issue — acceptance criteria, technical notes, dependencies
+3. Read any linked docs sections before writing code
+4. Work on ONE story — never combine stories in one session
+5. Write tests alongside implementation — never after
+6. Open a PR when done — human reviews and merges, you do not merge your own PRs
+
+**Definition of Done — every story:**
+- All acceptance criteria satisfied
+- Tests written and passing at 90% coverage
+- No linting violations (SwiftLint / Ruff)
+- No mypy errors
+- PR opened with clear description
+- ARCHITECTURE.md updated if any decision was made
+
+**What you never do independently:**
+- Make product decisions — flag and ask
+- Make visual design decisions without an approved Claude Design handoff bundle
+- Merge your own PRs
+- Activate prompt templates
+- Add new dependencies without flagging
+- Work on V2+ features — flag if you see one referenced
+
+**Design handoffs:**
+UI stories come with a Claude Design handoff bundle linked in the GitHub Issue.
+The bundle contains the approved prototype, design intent, and component specs.
+Read the bundle before writing any SwiftUI code. The bundle is the spec —
+SCREEN_INVENTORY.md and USER_FLOWS.md are reference documents, the bundle is
+what you build against.
+
+**Labels that affect your work:**
+- `security` — complete security review checklist before marking Done
+- `legal-blocked` — do not start, prerequisite must be resolved first
+- `design-required` — do not start iOS UI work without approved spec
+- `ai-ml` — prompt evaluation suite must pass before activation
+
+---
+
 ## Development workflow — the loop
 
 Every task follows this sequence before closing the GitHub issue:
