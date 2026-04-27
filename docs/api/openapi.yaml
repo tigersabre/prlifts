@@ -1,0 +1,1338 @@
+openapi: 3.1.0
+info:
+  title: PRLifts API
+  version: 1.0.0
+  description: |
+    PRLifts backend API. All endpoints require authentication unless marked public.
+    Authentication uses Supabase JWT passed as Bearer token in Authorization header.
+    All timestamps are UTC ISO 8601. All IDs are UUIDs.
+    Async AI operations return HTTP 202 with a job_id — poll GET /v1/jobs/{id} for result.
+  contact:
+    name: PRLifts Engineering
+servers:
+  - url: https://api.prlifts.app/v1
+    description: Production
+  - url: https://api-staging.prlifts.app/v1
+    description: Staging
+
+tags:
+  - name: auth
+    description: Authentication flows
+  - name: workouts
+    description: Workout management
+  - name: workout-exercises
+    description: Exercises within a workout
+  - name: workout-sets
+    description: Sets within a workout exercise
+  - name: exercises
+    description: Exercise library
+  - name: personal-records
+    description: Personal record tracking
+  - name: jobs
+    description: Async AI job polling
+  - name: users
+    description: User profile management
+  - name: notifications
+    description: Push notification management
+  - name: support
+    description: Support and debugging
+  - name: sync
+    description: Data synchronisation
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+
+    Timestamp:
+      type: string
+      format: date-time
+      example: "2026-04-25T14:30:00Z"
+
+    ErrorResponse:
+      type: object
+      required: [error_code, message, request_id]
+      properties:
+        error_code:
+          type: string
+          description: Machine-readable error code. See ERROR_CATALOG.md for full list.
+          example: "workout_not_found"
+        message:
+          type: string
+          description: Human-readable message safe to display to users.
+          example: "This workout could not be found."
+        request_id:
+          type: string
+          description: Correlation ID for support queries. Searchable in Railway logs.
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+    WeightUnit:
+      type: string
+      enum: [kg, lbs]
+
+    WorkoutStatus:
+      type: string
+      enum: [in_progress, paused, partial_completion, completed]
+
+    WorkoutFormat:
+      type: string
+      enum: [weightlifting, cardio, mixed, other]
+
+    WorkoutType:
+      type: string
+      enum: [ad_hoc, planned]
+
+    WorkoutLocation:
+      type: string
+      enum: [gym, home, outdoor, other]
+      nullable: true
+
+    SetType:
+      type: string
+      enum: [normal, warmup, dropset, failure, pr]
+
+    WeightModifier:
+      type: string
+      enum: [none, assisted, weighted]
+
+    RecordType:
+      type: string
+      enum: [heaviest_weight, most_reps, longest_duration, longest_distance, best_rpe]
+
+    JobStatus:
+      type: string
+      enum: [pending, processing, complete, failed, expired]
+
+    JobType:
+      type: string
+      enum: [insight, future_self, benchmarking]
+
+    Goal:
+      type: string
+      enum: [build_muscle, lose_fat, improve_endurance, athletic_performance, general_fitness]
+      nullable: true
+
+    Gender:
+      type: string
+      enum: [male, female, na]
+
+    BetaTier:
+      type: string
+      enum: [none, tester, full_access]
+
+    MuscleGroup:
+      type: string
+      enum:
+        - upper_chest
+        - mid_chest
+        - lower_chest
+        - upper_back
+        - lower_back
+        - shoulders
+        - biceps
+        - triceps
+        - quads
+        - hamstrings
+        - calves
+        - glutes
+        - abs
+        - obliques
+        - full_body
+
+    ExerciseCategory:
+      type: string
+      enum: [strength, cardio, flexibility, bodyweight, mobility, saq, rehab]
+
+    ExerciseEquipment:
+      type: string
+      enum: [barbell, dumbbell, kettlebell, machine, cable, bodyweight, cardio_machine, other]
+
+    User:
+      type: object
+      required: [id, unit_preference, measurement_unit, gender, beta_tier, created_at, updated_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Nullable — Apple Sign In may not provide email.
+        display_name:
+          type: string
+          nullable: true
+          maxLength: 50
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        unit_preference:
+          $ref: '#/components/schemas/WeightUnit'
+        measurement_unit:
+          type: string
+          enum: [cm, inches]
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        gender:
+          $ref: '#/components/schemas/Gender'
+        goal:
+          $ref: '#/components/schemas/Goal'
+        beta_tier:
+          $ref: '#/components/schemas/BetaTier'
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          maxLength: 50
+          nullable: true
+        unit_preference:
+          $ref: '#/components/schemas/WeightUnit'
+        measurement_unit:
+          type: string
+          enum: [cm, inches]
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        gender:
+          $ref: '#/components/schemas/Gender'
+        goal:
+          $ref: '#/components/schemas/Goal'
+
+    Exercise:
+      type: object
+      required: [id, name, category, muscle_group, equipment, is_custom, created_at, updated_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+          maxLength: 200
+        category:
+          $ref: '#/components/schemas/ExerciseCategory'
+        muscle_group:
+          $ref: '#/components/schemas/MuscleGroup'
+        secondary_muscle_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/MuscleGroup'
+          nullable: true
+        equipment:
+          $ref: '#/components/schemas/ExerciseEquipment'
+        instructions:
+          type: string
+          nullable: true
+        demo_url:
+          type: string
+          format: uri
+          nullable: true
+          description: ExerciseDB GIF or video URL. Null for custom exercises.
+        is_custom:
+          type: boolean
+        created_by:
+          $ref: '#/components/schemas/UUID'
+          nullable: true
+          description: Null for ExerciseDB exercises. User ID for custom exercises.
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    CreateExerciseRequest:
+      type: object
+      required: [name, category, muscle_group, equipment]
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        category:
+          $ref: '#/components/schemas/ExerciseCategory'
+        muscle_group:
+          $ref: '#/components/schemas/MuscleGroup'
+        secondary_muscle_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/MuscleGroup'
+          nullable: true
+        equipment:
+          $ref: '#/components/schemas/ExerciseEquipment'
+        instructions:
+          type: string
+          nullable: true
+          maxLength: 5000
+
+    Workout:
+      type: object
+      required: [id, user_id, status, type, format, started_at, created_at, updated_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        user_id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+          nullable: true
+          maxLength: 200
+        notes:
+          type: string
+          nullable: true
+          maxLength: 5000
+        status:
+          $ref: '#/components/schemas/WorkoutStatus'
+        type:
+          $ref: '#/components/schemas/WorkoutType'
+        format:
+          $ref: '#/components/schemas/WorkoutFormat'
+        plan_id:
+          $ref: '#/components/schemas/UUID'
+          nullable: true
+        started_at:
+          $ref: '#/components/schemas/Timestamp'
+        completed_at:
+          $ref: '#/components/schemas/Timestamp'
+          nullable: true
+        duration_seconds:
+          type: integer
+          nullable: true
+          description: Stored explicitly for query performance. Derived from completed_at - started_at.
+        location:
+          $ref: '#/components/schemas/WorkoutLocation'
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    CreateWorkoutRequest:
+      type: object
+      required: [type, format]
+      properties:
+        name:
+          type: string
+          nullable: true
+          maxLength: 200
+        type:
+          $ref: '#/components/schemas/WorkoutType'
+        format:
+          $ref: '#/components/schemas/WorkoutFormat'
+        location:
+          $ref: '#/components/schemas/WorkoutLocation'
+        plan_id:
+          $ref: '#/components/schemas/UUID'
+          nullable: true
+        client_started_at:
+          $ref: '#/components/schemas/Timestamp'
+          description: Client-reported start time. Server assigns server_received_at for conflict resolution.
+
+    UpdateWorkoutRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/WorkoutStatus'
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+        completed_at:
+          $ref: '#/components/schemas/Timestamp'
+          nullable: true
+
+    WorkoutExercise:
+      type: object
+      required: [id, workout_id, exercise_id, order_index, created_at, updated_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        workout_id:
+          $ref: '#/components/schemas/UUID'
+        exercise_id:
+          $ref: '#/components/schemas/UUID'
+        exercise:
+          $ref: '#/components/schemas/Exercise'
+          description: Eagerly loaded for display convenience.
+        order_index:
+          type: integer
+          minimum: 0
+        notes:
+          type: string
+          nullable: true
+          maxLength: 2000
+        rest_seconds:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 3600
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    CreateWorkoutExerciseRequest:
+      type: object
+      required: [workout_id, exercise_id, order_index]
+      properties:
+        workout_id:
+          $ref: '#/components/schemas/UUID'
+        exercise_id:
+          $ref: '#/components/schemas/UUID'
+        order_index:
+          type: integer
+          minimum: 0
+        notes:
+          type: string
+          nullable: true
+        rest_seconds:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 3600
+
+    WorkoutSet:
+      type: object
+      required: [id, workout_exercise_id, set_number, set_type, weight_modifier, is_completed, created_at, updated_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        workout_exercise_id:
+          $ref: '#/components/schemas/UUID'
+        set_number:
+          type: integer
+          minimum: 1
+          maximum: 100
+        set_type:
+          $ref: '#/components/schemas/SetType'
+        weight:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 2000
+          description: Null for pure bodyweight exercises.
+        weight_unit:
+          $ref: '#/components/schemas/WeightUnit'
+          nullable: true
+        weight_modifier:
+          $ref: '#/components/schemas/WeightModifier'
+        modifier_value:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 500
+        modifier_unit:
+          $ref: '#/components/schemas/WeightUnit'
+          nullable: true
+        reps:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 1000
+        duration_seconds:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 86400
+        distance_meters:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 100000
+        calories:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 10000
+        rpe:
+          type: integer
+          nullable: true
+          minimum: 1
+          maximum: 10
+        is_completed:
+          type: boolean
+        notes:
+          type: string
+          nullable: true
+          maxLength: 2000
+        is_personal_record:
+          type: boolean
+          description: True if this set triggered a PersonalRecord. Populated after completion.
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    CreateWorkoutSetRequest:
+      type: object
+      required: [workout_exercise_id, set_number, set_type, weight_modifier]
+      properties:
+        workout_exercise_id:
+          $ref: '#/components/schemas/UUID'
+        set_number:
+          type: integer
+          minimum: 1
+          maximum: 100
+        set_type:
+          $ref: '#/components/schemas/SetType'
+        weight:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 2000
+        weight_unit:
+          $ref: '#/components/schemas/WeightUnit'
+          nullable: true
+        weight_modifier:
+          $ref: '#/components/schemas/WeightModifier'
+          default: none
+        modifier_value:
+          type: number
+          nullable: true
+          minimum: 0
+          maximum: 500
+        modifier_unit:
+          $ref: '#/components/schemas/WeightUnit'
+          nullable: true
+        reps:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 1000
+        duration_seconds:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 86400
+        distance_meters:
+          type: number
+          nullable: true
+          minimum: 0
+          maximum: 100000
+        calories:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 10000
+        rpe:
+          type: integer
+          nullable: true
+          minimum: 1
+          maximum: 10
+        is_completed:
+          type: boolean
+          default: false
+        notes:
+          type: string
+          nullable: true
+          maxLength: 2000
+        client_created_at:
+          $ref: '#/components/schemas/Timestamp'
+          description: Client timestamp for sync ordering context. Server assigns authoritative timestamp.
+
+    PersonalRecord:
+      type: object
+      required: [id, user_id, exercise_id, workout_set_id, weight_modifier, record_type, value, recorded_at, created_at, updated_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        user_id:
+          $ref: '#/components/schemas/UUID'
+        exercise_id:
+          $ref: '#/components/schemas/UUID'
+        exercise:
+          $ref: '#/components/schemas/Exercise'
+          description: Eagerly loaded.
+        workout_set_id:
+          $ref: '#/components/schemas/UUID'
+        weight_modifier:
+          $ref: '#/components/schemas/WeightModifier'
+        record_type:
+          $ref: '#/components/schemas/RecordType'
+        value:
+          type: number
+          format: float
+        value_unit:
+          type: string
+          enum: [kg, lbs, reps, seconds, meters]
+          nullable: true
+        recorded_at:
+          $ref: '#/components/schemas/Timestamp'
+        previous_value:
+          type: number
+          format: float
+          nullable: true
+        previous_recorded_at:
+          $ref: '#/components/schemas/Timestamp'
+          nullable: true
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        updated_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    Job:
+      type: object
+      required: [id, user_id, job_type, status, created_at, expires_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        user_id:
+          $ref: '#/components/schemas/UUID'
+        job_type:
+          $ref: '#/components/schemas/JobType'
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        result:
+          type: object
+          nullable: true
+          description: Populated when status is complete. Schema varies by job_type.
+          oneOf:
+            - $ref: '#/components/schemas/InsightJobResult'
+            - $ref: '#/components/schemas/FutureSelfJobResult'
+        error_message:
+          type: string
+          nullable: true
+          description: User-facing message when status is failed or expired.
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+        started_at:
+          $ref: '#/components/schemas/Timestamp'
+          nullable: true
+        completed_at:
+          $ref: '#/components/schemas/Timestamp'
+          nullable: true
+        expires_at:
+          $ref: '#/components/schemas/Timestamp'
+          description: Job auto-expires 5 minutes after creation if not completed.
+
+    InsightJobResult:
+      type: object
+      required: [insight_text]
+      properties:
+        insight_text:
+          type: string
+          maxLength: 280
+
+    FutureSelfJobResult:
+      type: object
+      required: [image_url]
+      properties:
+        image_url:
+          type: string
+          format: uri
+          description: Time-limited signed URL to Supabase Storage. Regenerate if expired.
+        quality_score:
+          type: number
+          minimum: 1
+          maximum: 10
+          nullable: true
+
+    CreateJobRequest:
+      type: object
+      required: [job_type]
+      properties:
+        job_type:
+          $ref: '#/components/schemas/JobType'
+        workout_id:
+          $ref: '#/components/schemas/UUID'
+          nullable: true
+          description: Required for job_type insight.
+        photo:
+          type: string
+          format: byte
+          nullable: true
+          description: Required for job_type future_self. Base64-encoded JPEG or PNG. Max 10MB.
+
+    DeviceToken:
+      type: object
+      required: [token, platform]
+      properties:
+        token:
+          type: string
+          description: APNs device token.
+        platform:
+          type: string
+          enum: [ios]
+
+    SyncLogEntry:
+      type: object
+      required: [id, event_type, entity_type, entity_id, occurred_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        event_type:
+          type: string
+          enum: [write_attempt, sync_attempt, sync_success, sync_failure, conflict_resolved]
+        entity_type:
+          type: string
+          enum: [workout, workout_exercise, workout_set, personal_record, body_metrics, steps_entry]
+        entity_id:
+          $ref: '#/components/schemas/UUID'
+        detail:
+          type: string
+          nullable: true
+        occurred_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    SupportReport:
+      type: object
+      required: [device_model, ios_version, app_version, description]
+      properties:
+        device_model:
+          type: string
+          maxLength: 100
+        ios_version:
+          type: string
+          maxLength: 20
+        app_version:
+          type: string
+          maxLength: 20
+        description:
+          type: string
+          maxLength: 5000
+        sync_log_uploaded:
+          type: boolean
+          default: false
+
+    BiometricConsentRequest:
+      type: object
+      required: [consent_given, consent_version, policy_text_hash]
+      properties:
+        consent_given:
+          type: boolean
+        consent_version:
+          type: string
+          maxLength: 20
+        policy_text_hash:
+          type: string
+          description: SHA-256 hash of the exact consent text shown to the user.
+
+    PaginatedResponse:
+      type: object
+      required: [data, total, page, per_page]
+      properties:
+        data:
+          type: array
+          items: {}
+        total:
+          type: integer
+        page:
+          type: integer
+        per_page:
+          type: integer
+        has_more:
+          type: boolean
+
+security:
+  - BearerAuth: []
+
+paths:
+
+  # ── User ────────────────────────────────────────────────────────────────────
+
+  /users/me:
+    get:
+      tags: [users]
+      summary: Get current user profile
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      tags: [users]
+      summary: Update current user profile
+      operationId: updateCurrentUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/me/delete:
+    post:
+      tags: [users]
+      summary: Delete current user account
+      description: |
+        Initiates account deletion. User is signed out immediately.
+        All data deleted within 30 days per Privacy Policy.
+        This action is irreversible.
+      operationId: deleteCurrentUser
+      responses:
+        '204':
+          description: Deletion initiated
+        '401':
+          description: Unauthorised
+
+  /users/me/biometric-consent:
+    post:
+      tags: [users]
+      summary: Record biometric consent decision
+      description: |
+        Creates a BiometricConsent record. Must be called before any photo
+        is submitted for future self generation. If consent_given is false,
+        the future_self feature is disabled for this user until re-consented.
+        If the consent write fails, no photo will be processed — the error
+        is returned and the user is returned to the consent screen.
+      operationId: recordBiometricConsent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BiometricConsentRequest'
+      responses:
+        '201':
+          description: Consent recorded
+        '500':
+          description: Consent write failed — do not proceed with photo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Workouts ─────────────────────────────────────────────────────────────────
+
+  /workouts:
+    get:
+      tags: [workouts]
+      summary: List workouts for current user
+      operationId: listWorkouts
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: format
+          in: query
+          schema:
+            $ref: '#/components/schemas/WorkoutFormat'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/WorkoutStatus'
+      responses:
+        '200':
+          description: Paginated workout list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Workout'
+
+    post:
+      tags: [workouts]
+      summary: Create a new workout
+      operationId: createWorkout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkoutRequest'
+      responses:
+        '201':
+          description: Created workout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workout'
+
+  /workouts/{workout_id}:
+    parameters:
+      - name: workout_id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+    get:
+      tags: [workouts]
+      summary: Get workout by ID
+      operationId: getWorkout
+      responses:
+        '200':
+          description: Workout with exercises and sets
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Workout'
+                  - properties:
+                      exercises:
+                        type: array
+                        items:
+                          allOf:
+                            - $ref: '#/components/schemas/WorkoutExercise'
+                            - properties:
+                                sets:
+                                  type: array
+                                  items:
+                                    $ref: '#/components/schemas/WorkoutSet'
+        '403':
+          description: Not owned by current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      tags: [workouts]
+      summary: Update workout
+      operationId: updateWorkout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWorkoutRequest'
+      responses:
+        '200':
+          description: Updated workout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workout'
+
+  # ── Workout Exercises ─────────────────────────────────────────────────────
+
+  /workout-exercises:
+    post:
+      tags: [workout-exercises]
+      summary: Add exercise to workout
+      operationId: createWorkoutExercise
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkoutExerciseRequest'
+      responses:
+        '201':
+          description: Created workout exercise
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutExercise'
+
+  /workout-exercises/{workout_exercise_id}:
+    parameters:
+      - name: workout_exercise_id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+    delete:
+      tags: [workout-exercises]
+      summary: Remove exercise from workout
+      operationId: deleteWorkoutExercise
+      responses:
+        '204':
+          description: Deleted
+
+  # ── Workout Sets ──────────────────────────────────────────────────────────
+
+  /workout-sets:
+    post:
+      tags: [workout-sets]
+      summary: Log a workout set
+      description: |
+        Records a completed or planned set. Triggers PR detection when
+        is_completed is true. Returns the set with is_personal_record populated.
+      operationId: createWorkoutSet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkoutSetRequest'
+      responses:
+        '201':
+          description: Logged set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutSet'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /workout-sets/{workout_set_id}:
+    parameters:
+      - name: workout_set_id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+    patch:
+      tags: [workout-sets]
+      summary: Update a workout set
+      operationId: updateWorkoutSet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkoutSetRequest'
+      responses:
+        '200':
+          description: Updated set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutSet'
+
+  # ── Exercises ─────────────────────────────────────────────────────────────
+
+  /exercises:
+    get:
+      tags: [exercises]
+      summary: List exercises
+      operationId: listExercises
+      parameters:
+        - name: q
+          in: query
+          description: Search by name
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/ExerciseCategory'
+        - name: muscle_group
+          in: query
+          schema:
+            $ref: '#/components/schemas/MuscleGroup'
+        - name: equipment
+          in: query
+          schema:
+            $ref: '#/components/schemas/ExerciseEquipment'
+        - name: is_custom
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Paginated exercise list
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Exercise'
+
+    post:
+      tags: [exercises]
+      summary: Create custom exercise
+      operationId: createExercise
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExerciseRequest'
+      responses:
+        '201':
+          description: Created exercise
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exercise'
+        '409':
+          description: Name already taken
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /exercises/{exercise_id}:
+    parameters:
+      - name: exercise_id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+    get:
+      tags: [exercises]
+      summary: Get exercise by ID
+      operationId: getExercise
+      responses:
+        '200':
+          description: Exercise
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exercise'
+        '404':
+          description: Not found
+
+  # ── Personal Records ──────────────────────────────────────────────────────
+
+  /personal-records:
+    get:
+      tags: [personal-records]
+      summary: List personal records for current user
+      operationId: listPersonalRecords
+      parameters:
+        - name: exercise_id
+          in: query
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: record_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/RecordType'
+      responses:
+        '200':
+          description: List of personal records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonalRecord'
+
+  /personal-records/{record_id}:
+    parameters:
+      - name: record_id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+    get:
+      tags: [personal-records]
+      summary: Get personal record by ID
+      operationId: getPersonalRecord
+      responses:
+        '200':
+          description: Personal record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalRecord'
+        '404':
+          description: Not found
+
+  # ── Jobs ──────────────────────────────────────────────────────────────────
+
+  /jobs:
+    post:
+      tags: [jobs]
+      summary: Create async AI job
+      description: |
+        Creates an async job. Returns HTTP 202 immediately with a job_id.
+        Poll GET /v1/jobs/{id} for status.
+
+        For job_type future_self: BiometricConsent must exist and be accepted.
+        Photo must be JPEG or PNG, max 10MB. Photo is deleted within 60 seconds.
+
+        Polling strategy: 2s initial delay, exponential backoff, 10s ceiling, 15 attempts max.
+        Job expires after 5 minutes if not completed.
+      operationId: createJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJobRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateJobRequest'
+      responses:
+        '202':
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                properties:
+                  job_id:
+                    $ref: '#/components/schemas/UUID'
+        '403':
+          description: BiometricConsent required (future_self only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Monthly job limit reached
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /jobs/{job_id}:
+    parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+    get:
+      tags: [jobs]
+      summary: Poll job status
+      description: |
+        Returns current job status. Poll with exponential backoff.
+        When status is complete, result is populated.
+        When status is failed or expired, error_message is populated.
+      operationId: getJob
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '404':
+          description: Job not found
+
+  # ── Notifications ─────────────────────────────────────────────────────────
+
+  /notifications/device-token:
+    post:
+      tags: [notifications]
+      summary: Register device token for push notifications
+      operationId: registerDeviceToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceToken'
+      responses:
+        '204':
+          description: Token registered
+
+    delete:
+      tags: [notifications]
+      summary: Deregister device token
+      operationId: deregisterDeviceToken
+      responses:
+        '204':
+          description: Token removed
+
+  # ── Support ───────────────────────────────────────────────────────────────
+
+  /support/sync-log:
+    post:
+      tags: [support]
+      summary: Upload sync event log entries
+      description: Uploads pending SyncEventLog entries for debugging. Called automatically on sync failure or on demand via Report a Problem flow.
+      operationId: uploadSyncLog
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [entries]
+              properties:
+                entries:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SyncLogEntry'
+                  maxItems: 1000
+      responses:
+        '204':
+          description: Log uploaded
+
+  /support/reports:
+    post:
+      tags: [support]
+      summary: Submit support report
+      operationId: createSupportReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportReport'
+      responses:
+        '201':
+          description: Report submitted
+
