@@ -9,7 +9,6 @@ Tests for the health check endpoint, correlation ID middleware, app startup
 import json
 import logging
 import sys
-from types import TracebackType
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
@@ -163,9 +162,7 @@ def test_json_formatter_includes_exception_info_when_present() -> None:
     try:
         raise ValueError("deliberate test error")
     except ValueError:
-        exc_info: tuple[type[BaseException], BaseException, TracebackType | None] = (
-            sys.exc_info()
-        )  # type: ignore[assignment]
+        exc_info = sys.exc_info()
 
     record = logging.LogRecord(
         name="test.logger",
@@ -191,16 +188,19 @@ def test_json_formatter_includes_extra_fields() -> None:
     from app.logging_config import JSONFormatter
 
     formatter = JSONFormatter()
-    record = logging.LogRecord(
-        name="test.logger",
-        level=logging.INFO,
-        pathname="",
-        lineno=0,
-        msg="Event",
-        args=(),
-        exc_info=None,
+    # makeLogRecord sets entries directly into __dict__, so extra keys like
+    # user_id land on the record without any attribute-assignment type issues.
+    record = logging.makeLogRecord(
+        {
+            "name": "test.logger",
+            "levelno": logging.INFO,
+            "levelname": "INFO",
+            "msg": "Event",
+            "args": (),
+            "exc_info": None,
+            "user_id": "abc-123",
+        }
     )
-    record.user_id = "abc-123"  # type: ignore[attr-defined]
 
     # Act
     output = formatter.format(record)

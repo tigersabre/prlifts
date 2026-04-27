@@ -13,6 +13,10 @@ select = ["E", "F", "I", "N", "UP", "B", "C4"]
 python_version = "3.11"
 strict = true
 ignore_missing_imports = true
+# misc covers disallow-subclassing-any and disallow-untyped-decorators,
+# both unavoidable when subclassing Pydantic BaseModel or Starlette
+# BaseHTTPMiddleware and using FastAPI route decorators.
+disable_error_code = ["misc"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
