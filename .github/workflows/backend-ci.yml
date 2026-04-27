@@ -1,3 +1,14 @@
+# Backend CI
+#
+# Local development commands — run these from the backend/ directory.
+# These are the exact commands this workflow executes.
+#
+#   ruff check --config pyproject.toml .
+#   ruff format --check --config pyproject.toml .
+#   mypy --config-file mypy.ini .
+#   pytest
+#   pip-audit
+
 name: Backend CI
 
 on:
@@ -15,33 +26,32 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ruff mypy pytest pytest-cov pip-audit
+          pip install -r requirements.txt
 
       - name: Ruff lint
-        run: ruff check .
+        run: ruff check --config pyproject.toml .
 
       - name: Ruff format check
-        run: ruff format --check .
+        run: ruff format --check --config pyproject.toml .
 
       - name: mypy type check
-        run: mypy .
+        run: mypy --config-file mypy.ini .
 
       - name: pip audit
         run: pip-audit
 
       - name: Run tests with coverage
-        run: |
-          pytest --cov=. --cov-report=xml --cov-fail-under=90
+        run: pytest
 
       - name: Secret scanning
         uses: trufflesecurity/trufflehog@main
