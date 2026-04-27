@@ -29,6 +29,10 @@ class Settings:
         self.sentry_dsn: str = os.environ.get("SENTRY_DSN", "")
         self.api_host: str = os.environ.get("API_HOST", "0.0.0.0")
         self.api_port: int = int(os.environ.get("API_PORT", "8000"))
+        # DATABASE_URL contains credentials — never log this value.
+        self.database_url: str = os.environ["DATABASE_URL"]
+        self.db_pool_size: int = int(os.environ.get("DB_POOL_SIZE", "5"))
+        self.db_max_overflow: int = int(os.environ.get("DB_MAX_OVERFLOW", "5"))
 
 
 @lru_cache(maxsize=1)

@@ -23,6 +23,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
 
 from app.config import get_settings
+from app.database import close_db, init_db
 from app.logging_config import configure_logging
 from app.middleware.correlation_id import CorrelationIDMiddleware
 from app.routers.health import router as health_router
@@ -74,6 +75,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     configure_logging(settings.log_level)
     _init_sentry(settings.sentry_dsn, settings.environment)
 
+    await init_db()
     scheduler.start()
     logger.info(
         "Application started",
@@ -86,6 +88,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     scheduler.shutdown()
+    await close_db()
     logger.info("Application stopped")
 
 

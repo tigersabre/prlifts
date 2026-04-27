@@ -15,6 +15,13 @@ from collections.abc import Generator
 os.environ.setdefault("ENVIRONMENT", "test")
 os.environ.setdefault("LOG_LEVEL", "DEBUG")
 os.environ.setdefault("APP_VERSION", "0.1.0")
+# Fake DATABASE_URL used for unit tests — no real connection is made at engine
+# creation time (SQLAlchemy is lazy). Pool sizes are small to keep tests fast.
+os.environ.setdefault(
+    "DATABASE_URL", "postgresql+asyncpg://fake:fake@localhost:5432/fake_test"
+)
+os.environ.setdefault("DB_POOL_SIZE", "2")
+os.environ.setdefault("DB_MAX_OVERFLOW", "1")
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
