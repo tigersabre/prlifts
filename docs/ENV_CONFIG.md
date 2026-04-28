@@ -189,6 +189,13 @@ In Railway, environment variables are set per service per environment
 (staging vs production). Never share environment variables between
 the staging and production services.
 
+## Service URLs
+
+| Environment | URL |
+|---|---|
+| Staging | `https://prlifts-production.up.railway.app` |
+| Production | TBD — configured before public launch |
+
 **Setting a variable in Railway:**
 1. Select the service (PRLifts API)
 2. Variables tab
