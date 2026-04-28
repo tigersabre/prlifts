@@ -417,15 +417,21 @@ CREATE TABLE prompt_template (
     prompt_text     TEXT NOT NULL,
     is_active       BOOLEAN NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    deactivated_at  TIMESTAMPTZ,
-
-    CONSTRAINT one_active_per_feature UNIQUE NULLS NOT DISTINCT (feature, is_active)
-        DEFERRABLE INITIALLY DEFERRED
+    deactivated_at  TIMESTAMPTZ
 );
+
+-- Enforces exactly one active prompt per feature while allowing unlimited
+-- inactive versions. A table-level UNIQUE constraint would block multiple
+-- inactive rows for the same feature; a partial index does not.
+CREATE UNIQUE INDEX idx_one_active_per_feature
+    ON prompt_template (feature)
+    WHERE is_active = TRUE;
 
 COMMENT ON TABLE prompt_template IS
 'Versioned AI prompts stored in the database, not in application code.
-Only one prompt per feature may be active at a time (enforced by unique constraint).
+Only one prompt per feature may be active at a time (enforced by partial
+unique index on feature WHERE is_active = TRUE). Multiple inactive versions
+per feature are allowed, enabling prompt history and rollback.
 Changes to prompt templates require a content review before activation.
 The active PromptTemplate is fetched at runtime — no code deployment needed
 to iterate on prompts. Every AIRequestLog row references the prompt_template_id

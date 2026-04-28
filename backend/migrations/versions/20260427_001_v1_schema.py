@@ -361,11 +361,7 @@ def upgrade() -> None:
             prompt_text    TEXT    NOT NULL,
             is_active      BOOLEAN NOT NULL DEFAULT FALSE,
             created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-            deactivated_at TIMESTAMPTZ,
-
-            CONSTRAINT one_active_per_feature
-                UNIQUE NULLS NOT DISTINCT (feature, is_active)
-                DEFERRABLE INITIALLY DEFERRED
+            deactivated_at TIMESTAMPTZ
         )
     """)
     )
@@ -554,6 +550,13 @@ def upgrade() -> None:
         CREATE INDEX idx_job_expires
             ON job(expires_at)
             WHERE status IN ('pending', 'processing')
+    """)
+    )
+    op.execute(
+        sa.text("""
+        CREATE UNIQUE INDEX idx_one_active_per_feature
+            ON prompt_template (feature)
+            WHERE is_active = TRUE
     """)
     )
     op.execute(
