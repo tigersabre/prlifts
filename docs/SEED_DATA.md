@@ -8,7 +8,7 @@
 > Seed data is the initial data the database needs before the app is usable.
 > Without it, the exercise library is empty and the AI has no prompt templates.
 > Every environment (development, staging, production) requires seed data.
-> Seed scripts live in `backend/seeds/` and are run after migrations.
+> Seed scripts live in `backend/scripts/` and are run after migrations.
 
 ---
 
@@ -133,7 +133,7 @@ ExerciseDB contains approximately 1,300+ exercises. After mapping,
 expect 1,200–1,300 exercises in the database. Some exercises may be
 skipped if their category or equipment cannot be mapped.
 
-All skipped exercises are logged to `seeds/logs/exercise_seed_errors.log`.
+All skipped exercises are logged to `scripts/logs/exercise_seed_errors.log`.
 
 ---
 
@@ -341,29 +341,29 @@ BENCH_PRESS_ID = bench_press.id
 
 ```bash
 cd backend
-python seeds/run_migrations.py
-python seeds/seed_exercises.py          # takes 2-5 minutes (API calls)
-python seeds/seed_prompt_templates.py
-python seeds/seed_test_data.py          # development only
+python scripts/run_migrations.py
+python scripts/seed_exercises.py          # takes 2-5 minutes (API calls)
+python scripts/seed_prompt_templates.py
+python scripts/seed_test_data.py          # development only
 ```
 
 ### Staging
 
 ```bash
 # Run as part of Railway deployment pipeline
-python seeds/run_migrations.py
-python seeds/seed_exercises.py
-python seeds/seed_prompt_templates.py
-python seeds/seed_test_data.py          # staging only
+python scripts/run_migrations.py
+python scripts/seed_exercises.py
+python scripts/seed_prompt_templates.py
+python scripts/seed_test_data.py          # staging only
 ```
 
 ### Production
 
 ```bash
 # Run manually after first deployment and after each migration
-python seeds/run_migrations.py
-python seeds/seed_exercises.py
-python seeds/seed_prompt_templates.py
+python scripts/run_migrations.py
+python scripts/seed_exercises.py
+python scripts/seed_prompt_templates.py
 # DO NOT run seed_test_data.py on production
 ```
 
