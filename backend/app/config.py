@@ -29,6 +29,8 @@ class Settings:
         self.sentry_dsn: str = os.environ.get("SENTRY_DSN", "")
         self.api_host: str = os.environ.get("API_HOST", "0.0.0.0")
         self.api_port: int = int(os.environ.get("API_PORT", "8000"))
+        # Used to verify Supabase JWTs — never log this value.
+        self.supabase_jwt_secret: str = os.environ.get("SUPABASE_JWT_SECRET", "")
 
 
 @lru_cache(maxsize=1)
