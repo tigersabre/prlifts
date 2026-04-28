@@ -54,8 +54,23 @@ jobs:
         run: pytest
 
       - name: Secret scanning
+        # Use concrete SHA pairs from the event payload rather than branch names.
+        # Branch names (e.g. "main") resolve to the same commit as HEAD the moment
+        # a merge lands, making BASE == HEAD and causing TruffleHog to abort.
+        #
+        # pull_request: scan the exact diff the PR introduces (base sha → head sha).
+        # push:         scan commits added by this push (before sha → pushed sha).
+        #
+        # The step is skipped on the first push to a new branch because
+        # github.event.before is all-zeros — there is no previous commit to diff
+        # against, and the PR scan will cover those commits when a PR is opened.
+        if: >-
+          github.event_name == 'pull_request' ||
+          (github.event_name == 'push' &&
+          github.event.before != '0000000000000000000000000000000000000000' &&
+          github.event.before != github.sha)
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: main
-          head: HEAD
+          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
