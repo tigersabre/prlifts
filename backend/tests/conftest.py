@@ -15,6 +15,7 @@ from collections.abc import Generator
 os.environ.setdefault("ENVIRONMENT", "test")
 os.environ.setdefault("LOG_LEVEL", "DEBUG")
 os.environ.setdefault("APP_VERSION", "0.1.0")
+os.environ.setdefault("SUPABASE_JWT_SECRET", "test-supabase-jwt-secret-for-unit-tests")
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
