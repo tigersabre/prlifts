@@ -8,6 +8,9 @@ select = ["E", "F", "I", "N", "UP", "B", "C4"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["N802"]
+# SQL inside string literals frequently exceeds 88 chars; wrapping mid-statement
+# reduces readability more than it helps. E501 is suppressed for migration files.
+"migrations/**" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
