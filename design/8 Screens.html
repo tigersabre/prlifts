@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRLifts — 11 Screens × Dark &amp; Light</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="screens/screens-shared.jsx"></script>
+<script type="text/babel" src="screens/screens-onboarding.jsx"></script>
+<script type="text/babel" src="screens/screens-core.jsx"></script>
+<script type="text/babel" src="screens/screens-extra.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #06070F; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+// Wrapper: puts a Screen inside a Phone chrome
+function S({ Screen, t, ...props }) {
+  return <Phone t={t}><Screen t={t} {...props} /></Phone>;
+}
+
+function App() {
+  return (
+    <DesignCanvas
+      title="PRLifts — 11 Screens"
+      subtitle="Hybrid direction v2.0 · All screens in dark (gym) and light (outdoor) mode · Click any artboard to fullscreen"
+    >
+      {/* ── Phase 1 Onboarding ──────────────────────────────────── */}
+      <DCSection id="welcome" title="01 WelcomeScreen"
+        subtitle="App intro — value proposition, benefit bullets, Get started CTA · /onboarding/welcome">
+        <DCArtboard id="welcome-dark"  label="Dark mode"  width={390} height={844}><S Screen={WelcomeScreen}  t={DK}/></DCArtboard>
+        <DCArtboard id="welcome-light" label="Light mode" width={390} height={844}><S Screen={WelcomeScreen}  t={LT}/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="signin" title="02 SignInScreen"
+        subtitle="Sign in with Apple, Google, email · Error state shown · /onboarding/sign-in">
+        <DCArtboard id="signin-dark"  label="Dark mode"  width={390} height={844}><S Screen={SignInScreen}    t={DK}/></DCArtboard>
+        <DCArtboard id="signin-light" label="Light mode" width={390} height={844}><S Screen={SignInScreen}    t={LT}/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="displayname" title="03 DisplayNameScreen"
+        subtitle="Name entry · Focused input state · Progress step 3 of 4 · /onboarding/display-name">
+        <DCArtboard id="dn-dark"  label="Dark mode"  width={390} height={844}><S Screen={DisplayNameScreen}  t={DK}/></DCArtboard>
+        <DCArtboard id="dn-light" label="Light mode" width={390} height={844}><S Screen={DisplayNameScreen}  t={LT}/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="units" title="04 UnitPreferenceScreen"
+        subtitle="Weight (lbs/kg) + height (in/cm) · Large selection cards · US default · /onboarding/units">
+        <DCArtboard id="units-dark"  label="Dark mode"  width={390} height={844}><S Screen={UnitsScreen}      t={DK}/></DCArtboard>
+        <DCArtboard id="units-light" label="Light mode" width={390} height={844}><S Screen={UnitsScreen}      t={LT}/></DCArtboard>
+      </DCSection>
+
+      {/* ── Core App Screens ────────────────────────────────────── */}
+      <DCSection id="home" title="05 HomeScreen"
+        subtitle="Dashboard · 7-day streak, start workout CTA, recent PR cards, stat tiles · /home">
+        <DCArtboard id="home-dark"  label="Dark mode"  width={390} height={844}><S Screen={HomeScreen}        t={DK}/></DCArtboard>
+        <DCArtboard id="home-light" label="Light mode" width={390} height={844}><S Screen={HomeScreen}        t={LT}/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="active" title="06 ActiveWorkoutScreen"
+        subtitle="Set logging · PR banner active, 3 sets logged, set 4 input ready, Demo button → screen 09 · /workout/active">
+        <DCArtboard id="active-dark"  label="Dark mode"  width={390} height={844}><S Screen={ActiveWorkoutScreen}  t={DK}/></DCArtboard>
+        <DCArtboard id="active-light" label="Light mode" width={390} height={844}><S Screen={ActiveWorkoutScreen}  t={LT}/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="summary" title="07 WorkoutSummaryScreen"
+        subtitle="Post-workout · Gold PR celebration gradient, stats grid, AI insight, Done CTA · /workout/complete">
+        <DCArtboard id="summary-dark"  label="Dark mode"  width={390} height={844}><S Screen={WorkoutSummaryScreen} t={DK}/></DCArtboard>
+        <DCArtboard id="summary-light" label="Light mode" width={390} height={844}><S Screen={WorkoutSummaryScreen} t={LT}/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="prdetail" title="08 PRDetailScreen"
+        subtitle="PR detail · 225 lbs Bench Press, delta from previous, 5-bar progression chart · /records/detail/{id}">
+        <DCArtboard id="pr-dark"  label="Dark mode"  width={390} height={844}><S Screen={PRDetailScreen}     t={DK}/></DCArtboard>
+        <DCArtboard id="pr-light" label="Light mode" width={390} height={844}><S Screen={PRDetailScreen}     t={LT}/></DCArtboard>
+      </DCSection>
+
+      {/* ── New Screens ─────────────────────────────────────────── */}
+      <DCSection id="exercise" title="09 ExerciseDetailScreen"
+        subtitle="Exercise detail · ExerciseDB video player + muscle diagram fallback · Contextual CTA · /exercises/detail/{id}">
+        <DCArtboard id="ex-dark-video"  label="Dark · Video player"       width={390} height={844}><S Screen={ExerciseDetailScreen} t={DK} videoError={false}/></DCArtboard>
+        <DCArtboard id="ex-dark-error"  label="Dark · Video error fallback" width={390} height={844}><S Screen={ExerciseDetailScreen} t={DK} videoError={true}/></DCArtboard>
+        <DCArtboard id="ex-light-video" label="Light · Video player"      width={390} height={844}><S Screen={ExerciseDetailScreen} t={LT} videoError={false}/></DCArtboard>
+        <DCArtboard id="ex-light-error" label="Light · Video error fallback" width={390} height={844}><S Screen={ExerciseDetailScreen} t={LT} videoError={true}/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="editset" title="10 EditSetSheet"
+        subtitle="Bottom sheet overlay · PR recalculation warning on open · Pre-filled inputs · Save / Delete set · n/a (inline component)">
+        <DCArtboard id="editset-dark"  label="Dark mode"  width={390} height={844}><S Screen={EditSetSheetScreen}  t={DK}/></DCArtboard>
+        <DCArtboard id="editset-light" label="Light mode" width={390} height={844}><S Screen={EditSetSheetScreen}  t={LT}/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="deletedialog" title="11 Delete Workout — Confirmation Dialog"
+        subtitle="Destructive action confirmation · Appears on WorkoutSummaryScreen and WorkoutHistoryScreen · n/a (inline component)">
+        <DCArtboard id="del-dark"  label="Dark mode"  width={390} height={844}><S Screen={DeleteWorkoutDialogScreen} t={DK}/></DCArtboard>
+        <DCArtboard id="del-light" label="Light mode" width={390} height={844}><S Screen={DeleteWorkoutDialogScreen} t={LT}/></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

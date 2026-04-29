@@ -1,0 +1,210 @@
+/**
+ * PRLifts Design Tokens — CSS
+ * Version: 2.0 | April 2026
+ * Direction: Obsidian × Velocity Hybrid
+ *
+ * Brand:   Deep blue #1A3FBF + Gold #FFB300
+ * Success: Mint #00DFA2 (dark) / #00A37A (light)
+ * Cards:   Cool blue-indigo dark backgrounds
+ * Body:    DM Sans · Display: Nunito · Mono: SF Mono / ui-monospace
+ *
+ * Usage:
+ *   Default = dark mode.
+ *   Add [data-theme="light"] to <html> for light mode.
+ *   Both modes use the same CSS variable names — swap the root.
+ *
+ * Font imports (add to <head>):
+ *   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+ */
+
+/* ─── Dark Mode (default) ────────────────────────────────────────── */
+:root {
+
+  /* Brand */
+  --pr-brand:            #1A3FBF;
+  --pr-brand-lt:         #2D5BE3;
+  --pr-brand-dk:         #0F2A8A;
+  --pr-brand-glow:       rgba(26,63,191,0.35);
+  --pr-brand-subtle:     rgba(26,63,191,0.15);
+
+  /* Accent — Gold (PRs, achievements) */
+  --pr-accent:           #FFB300;
+  --pr-accent-lt:        #FFD040;
+  --pr-accent-dk:        #E09A00;
+  --pr-accent-glow:      rgba(255,179,0,0.30);
+  --pr-accent-subtle:    rgba(255,179,0,0.12);
+
+  /* Celebration gradient — PR moments only */
+  --pr-cel-start:        #FFD60A;
+  --pr-cel-end:          #FF9F0A;
+  --pr-cel-glow:         rgba(255,214,10,0.25);
+
+  /* Backgrounds — cool blue-indigo dark scale */
+  --pr-bg:               #080A14;
+  --pr-bg-sec:           #10132A;
+  --pr-bg-ter:           #1A1E40;
+  --pr-bg-quad:          #232756;
+
+  /* Text — cool-tinted white */
+  --pr-text-pri:         #FFFFFF;
+  --pr-text-sec:         rgba(210,220,255,0.62);
+  --pr-text-ter:         rgba(210,220,255,0.28);
+  --pr-text-on-brand:    #FFFFFF;
+  --pr-text-on-accent:   #0A0A0F;
+
+  /* Semantic */
+  --pr-success:          #00DFA2;   /* Mint — positive deltas, sync OK */
+  --pr-success-bg:       rgba(0,223,162,0.12);
+  --pr-warning:          #FF9F0A;
+  --pr-warning-bg:       rgba(255,159,10,0.12);
+  --pr-error:            #FF453A;
+  --pr-error-bg:         rgba(255,69,58,0.12);
+  --pr-offline:          #636E8A;
+  --pr-offline-bg:       rgba(99,110,138,0.12);
+
+  /* Borders */
+  --pr-border:           rgba(45,91,227,0.15);
+  --pr-border-st:        rgba(45,91,227,0.30);
+
+  /* Spacing */
+  --pr-space-xxxs:       4px;
+  --pr-space-xxs:        8px;
+  --pr-space-xs:         12px;
+  --pr-space-sm:         16px;
+  --pr-space-md:         20px;
+  --pr-space-lg:         24px;
+  --pr-space-xl:         32px;
+  --pr-space-xxl:        48px;
+  --pr-space-xxxl:       64px;
+  --pr-screen-h:         var(--pr-space-sm);
+  --pr-card-pad:         var(--pr-space-sm);
+  --pr-card-gap:         var(--pr-space-xxs);
+  --pr-btn-h:            50px;
+  --pr-touch-min:        44px;
+
+  /* Radii */
+  --pr-radius-sm:        6px;
+  --pr-radius-md:        10px;
+  --pr-radius-lg:        16px;
+  --pr-radius-xl:        20px;
+  --pr-radius-pill:      999px;
+
+  /* Shadows */
+  --pr-shadow-low:       0 2px 4px rgba(0,0,0,0.16);
+  --pr-shadow-md:        0 4px 12px rgba(0,0,0,0.24);
+  --pr-shadow-high:      0 8px 24px rgba(0,0,0,0.32);
+  --pr-shadow-brand:     0 6px 20px rgba(26,63,191,0.35);
+  --pr-shadow-accent:    0 6px 20px rgba(255,179,0,0.30);
+
+  /* Animations */
+  --pr-ease-std:         cubic-bezier(0.4,0,0.2,1);
+  --pr-ease-out:         cubic-bezier(0,0,0.2,1);
+  --pr-ease-spring:      cubic-bezier(0.34,1.56,0.64,1);
+  --pr-dur-std:          0.25s;
+  --pr-dur-quick:        0.15s;
+  --pr-dur-spring:       0.4s;
+
+  /* Typography */
+  --pr-font-display:     'Nunito', -apple-system, 'SF Pro Rounded', system-ui, sans-serif;
+  --pr-font-body:        'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --pr-font-mono:        'SF Mono', ui-monospace, Menlo, monospace;
+}
+
+/* ─── Light Mode ─────────────────────────────────────────────────── */
+[data-theme="light"] {
+
+  /* Brand stays identical */
+  --pr-brand:            #1A3FBF;
+  --pr-brand-lt:         #2D5BE3;
+  --pr-brand-dk:         #0F2A8A;
+  --pr-brand-glow:       rgba(26,63,191,0.20);
+  --pr-brand-subtle:     rgba(26,63,191,0.10);
+
+  /* Accent — richer gold for light surfaces */
+  --pr-accent:           #B5800A;
+  --pr-accent-lt:        #D4960D;
+  --pr-accent-dk:        #8A5F07;
+  --pr-accent-glow:      rgba(181,128,10,0.20);
+  --pr-accent-subtle:    rgba(181,128,10,0.10);
+
+  /* Celebration unchanged */
+  --pr-cel-start:        #FFD60A;
+  --pr-cel-end:          #FF9F0A;
+  --pr-cel-glow:         rgba(255,214,10,0.20);
+
+  /* Backgrounds — cool lavender-blue light scale */
+  --pr-bg:               #F0F3FF;
+  --pr-bg-sec:           #FFFFFF;
+  --pr-bg-ter:           #E2E8FF;
+  --pr-bg-quad:          #D0D8FF;
+
+  /* Text — deep blue-black */
+  --pr-text-pri:         #0F1535;
+  --pr-text-sec:         rgba(15,21,53,0.60);
+  --pr-text-ter:         rgba(15,21,53,0.32);
+  --pr-text-on-brand:    #FFFFFF;
+  --pr-text-on-accent:   #FFFFFF;
+
+  /* Semantic — slightly richer for light backgrounds */
+  --pr-success:          #00A37A;
+  --pr-success-bg:       rgba(0,163,122,0.12);
+  --pr-warning:          #B5680A;
+  --pr-warning-bg:       rgba(181,104,10,0.10);
+  --pr-error:            #CC2020;
+  --pr-error-bg:         rgba(204,32,32,0.10);
+  --pr-offline:          #4A5568;
+  --pr-offline-bg:       rgba(74,85,104,0.10);
+
+  /* Borders */
+  --pr-border:           rgba(26,63,191,0.10);
+  --pr-border-st:        rgba(26,63,191,0.22);
+
+  /* Shadows — lighter for light mode */
+  --pr-shadow-low:       0 2px 6px rgba(15,21,53,0.08);
+  --pr-shadow-md:        0 4px 12px rgba(15,21,53,0.10);
+  --pr-shadow-high:      0 8px 24px rgba(15,21,53,0.12);
+  --pr-shadow-brand:     0 6px 20px rgba(26,63,191,0.25);
+  --pr-shadow-accent:    0 6px 20px rgba(181,128,10,0.20);
+}
+
+/* ─── Typography Class Helpers ───────────────────────────────────── */
+.pr-display-lg  { font-family:var(--pr-font-display); font-size:48px; font-weight:900; line-height:1.05; letter-spacing:-0.5px; }
+.pr-display-md  { font-family:var(--pr-font-display); font-size:34px; font-weight:800; line-height:1.1;  letter-spacing:-0.3px; }
+.pr-headline-lg { font-family:var(--pr-font-display); font-size:22px; font-weight:700; line-height:1.2;  }
+.pr-headline-md { font-family:var(--pr-font-body);    font-size:17px; font-weight:600; line-height:1.3;  }
+.pr-body        { font-family:var(--pr-font-body);    font-size:17px; font-weight:400; line-height:1.5;  }
+.pr-body-sec    { font-family:var(--pr-font-body);    font-size:15px; font-weight:400; line-height:1.45; }
+.pr-data-lg     { font-family:var(--pr-font-mono);    font-size:28px; font-weight:600; line-height:1.1;  font-variant-numeric:tabular-nums; }
+.pr-data-md     { font-family:var(--pr-font-mono);    font-size:20px; font-weight:500; line-height:1.2;  font-variant-numeric:tabular-nums; }
+.pr-data-sm     { font-family:var(--pr-font-mono);    font-size:15px; font-weight:500; line-height:1.3;  font-variant-numeric:tabular-nums; }
+.pr-caption     { font-family:var(--pr-font-body);    font-size:13px; font-weight:400; line-height:1.4;  }
+.pr-caption-sm  { font-family:var(--pr-font-body);    font-size:11px; font-weight:400; line-height:1.4;  }
+.pr-btn-pri     { font-family:var(--pr-font-body);    font-size:17px; font-weight:700; }
+.pr-btn-sec     { font-family:var(--pr-font-body);    font-size:15px; font-weight:500; }
+
+/* ─── Component Helpers ──────────────────────────────────────────── */
+.pr-card {
+  background:     var(--pr-bg-sec);
+  border-radius:  var(--pr-radius-lg);
+  box-shadow:     var(--pr-shadow-low);
+  padding:        var(--pr-card-pad);
+  border:         1px solid var(--pr-border);
+}
+.pr-btn-base {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  min-height:      var(--pr-btn-h);
+  border-radius:   var(--pr-radius-pill);
+  border:          none;
+  cursor:          pointer;
+  font-family:     var(--pr-font-body);
+  font-size:       17px;
+  font-weight:     700;
+  transition:      opacity var(--pr-dur-quick) var(--pr-ease-out), transform var(--pr-dur-quick) var(--pr-ease-out);
+}
+.pr-btn-base:active { opacity: 0.82; transform: scale(0.98); }
+.pr-btn-primary     { background: var(--pr-brand); color: var(--pr-text-on-brand); box-shadow: var(--pr-shadow-brand); }
+.pr-btn-secondary   { background: transparent; color: var(--pr-brand); border: 1.5px solid var(--pr-brand); }
+.pr-btn-destructive { background: var(--pr-error); color: #fff; }
+.pr-btn-ghost       { background: transparent; color: var(--pr-text-pri); }

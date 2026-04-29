@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PRLifts — Developer Handoff Bundle</title>
+<style>
+:root {
+  --bg:#080A14; --bg2:#10132A; --bg3:#1A1E40; --bg4:#232756;
+  --brand:#1A3FBF; --brandlt:#2D5BE3;
+  --accent:#FFB300; --success:#00DFA2; --error:#FF453A; --warn:#FF9F0A;
+  --text:#fff; --t2:rgba(210,220,255,.65); --t3:rgba(210,220,255,.32);
+  --border:rgba(45,91,227,.18); --borderst:rgba(45,91,227,.32);
+  --font:-apple-system,'SF Pro Text','DM Sans',system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;display:flex;min-height:100vh;}
+nav{width:220px;background:var(--bg2);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+nav h2{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3);padding:0 18px;margin-bottom:6px;margin-top:20px;}
+nav h2:first-of-type{margin-top:0;}
+nav a{display:block;padding:6px 18px;font-size:13px;color:var(--t2);text-decoration:none;border-radius:0;}
+nav a:hover{color:var(--text);background:var(--bg3);}
+nav a.active{color:var(--brandlt);font-weight:600;}
+main{flex:1;padding:40px 48px;max-width:960px;}
+h1{font-size:28px;font-weight:800;letter-spacing:-.5px;color:var(--text);margin-bottom:6px;}
+h2.section{font-size:20px;font-weight:800;color:var(--text);margin:40px 0 16px;padding-top:40px;border-top:1px solid var(--border);}
+h3{font-size:15px;font-weight:700;color:var(--text);margin:24px 0 10px;}
+h4{font-size:13px;font-weight:700;color:var(--t2);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;}
+p{color:var(--t2);margin-bottom:12px;}
+a{color:var(--brandlt);}
+/* Tables */
+table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px;}
+th{text-align:left;padding:8px 12px;background:var(--bg3);color:var(--t3);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--t2);vertical-align:top;}
+td:first-child{color:var(--text);font-family:var(--mono);font-size:12px;}
+tr:hover td{background:var(--bg2);}
+/* Swatches */
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:middle;margin-right:6px;flex-shrink:0;border:1px solid rgba(255,255,255,0.08);}
+/* Code blocks */
+pre{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;overflow-x:auto;margin:10px 0 20px;}
+code{font-family:var(--mono);font-size:12.5px;line-height:1.65;color:rgba(210,220,255,.9);}
+.kw{color:#7C9FFF;} .str{color:#00DFA2;} .cmt{color:rgba(210,220,255,.35);font-style:italic;} .type{color:#FFB300;} .num{color:#FF9F0A;}
+/* Callouts */
+.callout{border-radius:10px;padding:12px 16px;margin:12px 0 20px;border:1px solid;font-size:13px;}
+.callout.gold{background:rgba(255,179,0,.10);border-color:rgba(255,179,0,.28);color:var(--accent);}
+.callout.mint{background:rgba(0,223,162,.10);border-color:rgba(0,223,162,.25);color:var(--success);}
+.callout.blue{background:rgba(26,63,191,.15);border-color:rgba(45,91,227,.30);color:var(--brandlt);}
+.callout.warn{background:rgba(255,159,10,.10);border-color:rgba(255,159,10,.28);color:var(--warn);}
+/* Pills */
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;margin-right:4px;}
+.pill.blue{background:rgba(26,63,191,.2);color:var(--brandlt);}
+.pill.gold{background:rgba(255,179,0,.15);color:var(--accent);}
+.pill.mint{background:rgba(0,223,162,.12);color:var(--success);}
+.pill.red{background:rgba(255,69,58,.12);color:var(--error);}
+/* Token row */
+.token-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:20px;}
+.token-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.token-name{font-family:var(--mono);font-size:11px;color:var(--t3);margin-bottom:4px;}
+.token-val{font-size:13px;font-weight:700;color:var(--text);}
+.token-sub{font-size:11px;color:var(--t3);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <h2>Overview</h2>
+  <a href="#intro">Introduction</a>
+  <a href="#howto">How to use</a>
+  <h2>Design Tokens</h2>
+  <a href="#colors">Colors</a>
+  <a href="#typography">Typography</a>
+  <a href="#spacing">Spacing</a>
+  <a href="#radii">Radii &amp; Shadows</a>
+  <a href="#animation">Animation</a>
+  <h2>Components</h2>
+  <a href="#prbutton">PRButton</a>
+  <a href="#prcard">PRCard</a>
+  <a href="#navbar">PRNavBar</a>
+  <a href="#tabbar">PRTabBar</a>
+  <a href="#prbanner">PRNotificationBanner</a>
+  <a href="#sheet">PRBottomSheet</a>
+  <a href="#dialog">PRConfirmationDialog</a>
+  <a href="#video">PRVideoPlayer</a>
+  <a href="#bodydiagram">PRBodyDiagram</a>
+  <a href="#progressdots">PRProgressDots</a>
+  <h2>Screens</h2>
+  <a href="handoff-screens.html" target="_blank">→ Screen Specs (separate doc)</a>
+</nav>
+
+<main>
+
+<!-- ── Introduction ──────────────────────────────────────────── -->
+<h1 id="intro">PRLifts — Developer Handoff Bundle</h1>
+<p style="color:var(--t3);margin-bottom:6px;">Version 2.0 · Approved April 2026 · Obsidian × Velocity Hybrid direction</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
+  <span class="pill blue">11 screens</span>
+  <span class="pill blue">Dark + light mode</span>
+  <span class="pill gold">Gold = PR moments only</span>
+  <span class="pill mint">Mint = positive deltas</span>
+</div>
+
+<h3 id="howto">How Claude Code should use this bundle</h3>
+<div class="callout blue">
+  This bundle is the authoritative spec for all UI work. Read it before writing any SwiftUI. Never make visual design decisions not covered here — flag and ask instead.
+</div>
+<ol style="color:var(--t2);padding-left:18px;display:flex;flex-direction:column;gap:6px;margin-bottom:24px;">
+  <li>Read this file (tokens + components). Read <a href="handoff-screens.html">handoff-screens.html</a> for per-screen specs.</li>
+  <li>Reference <code>docs/DESIGN_TOKENS.md</code> in the repo for original SwiftUI token definitions — update color values from this bundle (Hybrid direction).</li>
+  <li>Implement tokens as Color/Font/Spacing extensions exactly as specified below.</li>
+  <li>Build the shared components first, then assemble screens from them.</li>
+  <li>Every interactive element requires an <code>.accessibilityLabel</code>. Minimum touch target: 44×44pt.</li>
+</ol>
+
+<!-- ── Colors ────────────────────────────────────────────────── -->
+<h2 class="section" id="colors">Design Tokens — Colors</h2>
+
+<div class="callout warn">
+  <strong>Hybrid direction change from original DESIGN_TOKENS.md:</strong> Dark backgrounds now use a cool blue-indigo scale (not neutral black). Success color is mint #00DFA2 (not green #30D158). Body font is DM Sans (system-ui fallback in code). These values override docs/DESIGN_TOKENS.md.
+</div>
+
+<h4>Asset Catalog Setup — Colors/</h4>
+<p>All colors defined in <code>Assets.xcassets/Colors/</code> with Any (light) and Dark appearances. Use exact values below.</p>
+
+<table>
+  <tr><th>Asset name</th><th>Any (light)</th><th>Dark</th><th>Use</th></tr>
+  <tr><td>PRBrand</td><td><span class="sw" style="background:#1A3FBF"></span>#1A3FBF</td><td><span class="sw" style="background:#1A3FBF"></span>#1A3FBF</td><td>Primary buttons, active states, links</td></tr>
+  <tr><td>PRBrandLight</td><td><span class="sw" style="background:#2D5BE3"></span>#2D5BE3</td><td><span class="sw" style="background:#2D5BE3"></span>#2D5BE3</td><td>Hover states, links, back buttons</td></tr>
+  <tr><td>PRAccent</td><td><span class="sw" style="background:#B5800A"></span>#B5800A</td><td><span class="sw" style="background:#FFB300"></span>#FFB300</td><td>PR achievements ONLY — not general accent</td></tr>
+  <tr><td>PRSuccess</td><td><span class="sw" style="background:#00A37A"></span>#00A37A</td><td><span class="sw" style="background:#00DFA2"></span>#00DFA2</td><td>Positive deltas, sync OK, progress</td></tr>
+  <tr><td>PRWarning</td><td><span class="sw" style="background:#B5680A"></span>#B5680A</td><td><span class="sw" style="background:#FF9F0A"></span>#FF9F0A</td><td>Rate limit, optional fields, PR recalc warning</td></tr>
+  <tr><td>PRError</td><td><span class="sw" style="background:#CC2020"></span>#CC2020</td><td><span class="sw" style="background:#FF453A"></span>#FF453A</td><td>Validation errors, destructive actions</td></tr>
+  <tr><td>PROffline</td><td><span class="sw" style="background:#4A5568"></span>#4A5568</td><td><span class="sw" style="background:#636E8A"></span>#636E8A</td><td>Offline banner, connectivity lost</td></tr>
+  <tr><td>PRBackground</td><td><span class="sw" style="background:#F0F3FF;border-color:rgba(0,0,0,.2)"></span>#F0F3FF</td><td><span class="sw" style="background:#080A14"></span>#080A14</td><td>Primary screen background</td></tr>
+  <tr><td>PRBackgroundSec</td><td><span class="sw" style="background:#FFFFFF;border-color:rgba(0,0,0,.2)"></span>#FFFFFF</td><td><span class="sw" style="background:#10132A"></span>#10132A</td><td>Cards, sheets, grouped content</td></tr>
+  <tr><td>PRBackgroundTer</td><td><span class="sw" style="background:#E2E8FF"></span>#E2E8FF</td><td><span class="sw" style="background:#1A1E40"></span>#1A1E40</td><td>Input fields, segmented controls</td></tr>
+  <tr><td>PRBackgroundQuad</td><td><span class="sw" style="background:#D0D8FF"></span>#D0D8FF</td><td><span class="sw" style="background:#232756"></span>#232756</td><td>Selected segment, control surfaces</td></tr>
+  <tr><td>PRTextPrimary</td><td><span class="sw" style="background:#0F1535"></span>#0F1535</td><td><span class="sw" style="background:#FFFFFF"></span>#FFFFFF</td><td>Headlines, body copy</td></tr>
+  <tr><td>PRTextSecondary</td><td colspan="2" style="font-family:var(--mono);font-size:11px;">Any: rgba(15,21,53,0.60) · Dark: rgba(210,220,255,0.62)</td><td>Subtitles, metadata — cool-tinted in dark</td></tr>
+  <tr><td>PRTextTertiary</td><td colspan="2" style="font-family:var(--mono);font-size:11px;">Any: rgba(15,21,53,0.32) · Dark: rgba(210,220,255,0.28)</td><td>Placeholders, disabled labels</td></tr>
+  <tr><td>PRTextOnBrand</td><td><span class="sw" style="background:#FFFFFF"></span>#FFFFFF</td><td><span class="sw" style="background:#FFFFFF"></span>#FFFFFF</td><td>Text on brand-colored surfaces</td></tr>
+  <tr><td>PRBorder</td><td colspan="2" style="font-family:var(--mono);font-size:11px;">Any: rgba(26,63,191,0.10) · Dark: rgba(45,91,227,0.15)</td><td>Card borders, dividers</td></tr>
+  <tr><td>PRCelebrationStart</td><td><span class="sw" style="background:#FFD60A"></span>#FFD60A</td><td><span class="sw" style="background:#FFD60A"></span>#FFD60A</td><td>Gold gradient start — PR celebrations ONLY</td></tr>
+  <tr><td>PRCelebrationEnd</td><td><span class="sw" style="background:#FF9F0A"></span>#FF9F0A</td><td><span class="sw" style="background:#FF9F0A"></span>#FF9F0A</td><td>Gold gradient end — PR celebrations ONLY</td></tr>
+</table>
+
+<pre><code><span class="cmt">// DesignTokens+Colors.swift — Hybrid direction values</span>
+<span class="kw">extension</span> <span class="type">Color</span> {
+    <span class="kw">static let</span> prBrand           = <span class="type">Color</span>(<span class="str">"PRBrand"</span>)
+    <span class="kw">static let</span> prBrandLight       = <span class="type">Color</span>(<span class="str">"PRBrandLight"</span>)
+    <span class="kw">static let</span> prAccent           = <span class="type">Color</span>(<span class="str">"PRAccent"</span>)          <span class="cmt">// PR moments only</span>
+    <span class="kw">static let</span> prSuccess          = <span class="type">Color</span>(<span class="str">"PRSuccess"</span>)         <span class="cmt">// Mint — positive deltas</span>
+    <span class="kw">static let</span> prWarning          = <span class="type">Color</span>(<span class="str">"PRWarning"</span>)
+    <span class="kw">static let</span> prError            = <span class="type">Color</span>(<span class="str">"PRError"</span>)
+    <span class="kw">static let</span> prOffline          = <span class="type">Color</span>(<span class="str">"PROffline"</span>)
+    <span class="kw">static let</span> prBackground       = <span class="type">Color</span>(<span class="str">"PRBackground"</span>)
+    <span class="kw">static let</span> prBackgroundSec    = <span class="type">Color</span>(<span class="str">"PRBackgroundSec"</span>)
+    <span class="kw">static let</span> prBackgroundTer    = <span class="type">Color</span>(<span class="str">"PRBackgroundTer"</span>)
+    <span class="kw">static let</span> prBackgroundQuad   = <span class="type">Color</span>(<span class="str">"PRBackgroundQuad"</span>)
+    <span class="kw">static let</span> prTextPrimary      = <span class="type">Color</span>(<span class="str">"PRTextPrimary"</span>)
+    <span class="kw">static let</span> prTextSecondary    = <span class="type">Color</span>(<span class="str">"PRTextSecondary"</span>)
+    <span class="kw">static let</span> prTextTertiary     = <span class="type">Color</span>(<span class="str">"PRTextTertiary"</span>)
+    <span class="kw">static let</span> prTextOnBrand      = <span class="type">Color</span>(<span class="str">"PRTextOnBrand"</span>)
+    <span class="kw">static let</span> prBorder           = <span class="type">Color</span>(<span class="str">"PRBorder"</span>)
+    <span class="kw">static let</span> prCelebrationStart = <span class="type">Color</span>(<span class="str">"PRCelebrationStart"</span>)
+    <span class="kw">static let</span> prCelebrationEnd   = <span class="type">Color</span>(<span class="str">"PRCelebrationEnd"</span>)
+}</code></pre>
+
+<!-- ── Typography ─────────────────────────────────────────────── -->
+<h2 class="section" id="typography">Design Tokens — Typography</h2>
+
+<div class="callout blue">
+  On iOS, use <code>Font.system(design: .rounded)</code> for display/headline sizes — this matches SF Pro Rounded. Nunito is the web prototype substitute only. DM Sans maps to system-ui; on iOS this is SF Pro Text.
+</div>
+
+<table>
+  <tr><th>Token</th><th>Size</th><th>Weight</th><th>Design</th><th>Use</th></tr>
+  <tr><td>prDisplayLarge</td><td>48pt</td><td>.black</td><td>.rounded</td><td>Hero PR values, large stats</td></tr>
+  <tr><td>prDisplayMedium</td><td>34pt</td><td>.heavy</td><td>.rounded</td><td>Screen titles, section headlines</td></tr>
+  <tr><td>prHeadlineLarge</td><td>22pt</td><td>.bold</td><td>.rounded</td><td>Card titles, exercise names</td></tr>
+  <tr><td>prHeadlineMedium</td><td>17pt</td><td>.semibold</td><td>.default</td><td>Sub-section titles, set headers</td></tr>
+  <tr><td>prBody</td><td>17pt</td><td>.regular</td><td>.default</td><td>Primary body copy</td></tr>
+  <tr><td>prBodySecondary</td><td>15pt</td><td>.regular</td><td>.default</td><td>Metadata, descriptions</td></tr>
+  <tr><td>prDataLarge</td><td>28pt</td><td>.semibold</td><td>.monospaced</td><td>Primary stat — weight, distance</td></tr>
+  <tr><td>prDataMedium</td><td>20pt</td><td>.medium</td><td>.monospaced</td><td>Set data — weight/reps/RPE</td></tr>
+  <tr><td>prDataSmall</td><td>15pt</td><td>.medium</td><td>.monospaced</td><td>Inline data, history rows</td></tr>
+  <tr><td>prCaption</td><td>13pt</td><td>.regular</td><td>.default</td><td>Labels, tags, badges</td></tr>
+  <tr><td>prCaptionSmall</td><td>11pt</td><td>.regular</td><td>.default</td><td>Timestamps, fine print</td></tr>
+  <tr><td>prButtonPrimary</td><td>17pt</td><td>.bold</td><td>.default</td><td>Primary button label</td></tr>
+  <tr><td>prButtonSecondary</td><td>15pt</td><td>.medium</td><td>.default</td><td>Secondary button label</td></tr>
+</table>
+
+<pre><code><span class="cmt">// DesignTokens+Typography.swift</span>
+<span class="kw">extension</span> <span class="type">Font</span> {
+    <span class="kw">static let</span> prDisplayLarge    = <span class="type">Font</span>.system(size: <span class="num">48</span>, weight: .black,    design: .rounded)
+    <span class="kw">static let</span> prDisplayMedium   = <span class="type">Font</span>.system(size: <span class="num">34</span>, weight: .heavy,    design: .rounded)
+    <span class="kw">static let</span> prHeadlineLarge   = <span class="type">Font</span>.system(size: <span class="num">22</span>, weight: .bold,     design: .rounded)
+    <span class="kw">static let</span> prHeadlineMedium  = <span class="type">Font</span>.system(.headline)          <span class="cmt">// 17 semibold</span>
+    <span class="kw">static let</span> prBody            = <span class="type">Font</span>.system(.body)               <span class="cmt">// 17 regular</span>
+    <span class="kw">static let</span> prBodySecondary   = <span class="type">Font</span>.system(.subheadline)        <span class="cmt">// 15 regular</span>
+    <span class="kw">static let</span> prDataLarge       = <span class="type">Font</span>.system(size: <span class="num">28</span>, weight: .semibold, design: .monospaced)
+    <span class="kw">static let</span> prDataMedium      = <span class="type">Font</span>.system(size: <span class="num">20</span>, weight: .medium,   design: .monospaced)
+    <span class="kw">static let</span> prDataSmall       = <span class="type">Font</span>.system(size: <span class="num">15</span>, weight: .medium,   design: .monospaced)
+    <span class="kw">static let</span> prCaption         = <span class="type">Font</span>.system(.caption)            <span class="cmt">// 13</span>
+    <span class="kw">static let</span> prCaptionSmall    = <span class="type">Font</span>.system(.caption2)           <span class="cmt">// 11</span>
+    <span class="kw">static let</span> prButtonPrimary   = <span class="type">Font</span>.system(.body).weight(.bold)
+    <span class="kw">static let</span> prButtonSecondary = <span class="type">Font</span>.system(.subheadline).weight(.medium)
+}</code></pre>
+
+<!-- ── Spacing ────────────────────────────────────────────────── -->
+<h2 class="section" id="spacing">Design Tokens — Spacing</h2>
+
+<pre><code><span class="cmt">// DesignTokens+Spacing.swift — unchanged from original</span>
+<span class="kw">enum</span> <span class="type">PRSpacing</span> {
+    <span class="kw">static let</span> xxxSmall: <span class="type">CGFloat</span> = <span class="num">4</span>    <span class="cmt">// Icon-to-label</span>
+    <span class="kw">static let</span> xxSmall:  <span class="type">CGFloat</span> = <span class="num">8</span>    <span class="cmt">// Card gap</span>
+    <span class="kw">static let</span> xSmall:   <span class="type">CGFloat</span> = <span class="num">12</span>   <span class="cmt">// Card internals</span>
+    <span class="kw">static let</span> small:    <span class="type">CGFloat</span> = <span class="num">16</span>   <span class="cmt">// ← Standard. Screen horizontal, card padding</span>
+    <span class="kw">static let</span> medium:   <span class="type">CGFloat</span> = <span class="num">20</span>   <span class="cmt">// Between cards</span>
+    <span class="kw">static let</span> large:    <span class="type">CGFloat</span> = <span class="num">24</span>   <span class="cmt">// Section separation</span>
+    <span class="kw">static let</span> xLarge:   <span class="type">CGFloat</span> = <span class="num">32</span>   <span class="cmt">// Screen breathing room</span>
+    <span class="kw">static let</span> xxLarge:  <span class="type">CGFloat</span> = <span class="num">48</span>   <span class="cmt">// Onboarding, hero sections</span>
+    <span class="kw">static let</span> xxxLarge: <span class="type">CGFloat</span> = <span class="num">64</span>   <span class="cmt">// Max whitespace</span>
+    <span class="cmt">// Semantic aliases</span>
+    <span class="kw">static let</span> screenHorizontal:    <span class="type">CGFloat</span> = small      <span class="cmt">// 16</span>
+    <span class="kw">static let</span> cardPadding:          <span class="type">CGFloat</span> = small      <span class="cmt">// 16</span>
+    <span class="kw">static let</span> cardGap:              <span class="type">CGFloat</span> = xxSmall    <span class="cmt">// 8</span>
+    <span class="kw">static let</span> buttonHeight:         <span class="type">CGFloat</span> = <span class="num">50</span>
+    <span class="kw">static let</span> minimumTouchTarget:   <span class="type">CGFloat</span> = <span class="num">44</span>
+}</code></pre>
+
+<!-- ── Radii + Shadows ────────────────────────────────────────── -->
+<h2 class="section" id="radii">Design Tokens — Radii &amp; Shadows</h2>
+
+<pre><code><span class="kw">enum</span> <span class="type">PRRadius</span> {
+    <span class="kw">static let</span> small:  <span class="type">CGFloat</span> = <span class="num">6</span>    <span class="cmt">// Chips, badges, tags</span>
+    <span class="kw">static let</span> medium: <span class="type">CGFloat</span> = <span class="num">10</span>   <span class="cmt">// Input fields, small cards</span>
+    <span class="kw">static let</span> large:  <span class="type">CGFloat</span> = <span class="num">16</span>   <span class="cmt">// Cards, sheets, major UI</span>
+    <span class="kw">static let</span> xLarge: <span class="type">CGFloat</span> = <span class="num">20</span>   <span class="cmt">// Bottom sheets (top corners)</span>
+    <span class="kw">static let</span> pill:   <span class="type">CGFloat</span> = <span class="num">999</span>  <span class="cmt">// Buttons, chips</span>
+}
+
+<span class="kw">struct</span> <span class="type">PRShadow</span> {
+    <span class="kw">let</span> color: <span class="type">Color</span>; <span class="kw">let</span> radius: <span class="type">CGFloat</span>; <span class="kw">let</span> x: <span class="type">CGFloat</span>; <span class="kw">let</span> y: <span class="type">CGFloat</span>
+    <span class="kw">static let</span> low    = <span class="type">PRShadow</span>(color: .black.opacity(<span class="num">0.12</span>), radius: <span class="num">4</span>,  x: <span class="num">0</span>, y: <span class="num">2</span>)
+    <span class="kw">static let</span> medium = <span class="type">PRShadow</span>(color: .black.opacity(<span class="num">0.20</span>), radius: <span class="num">8</span>,  x: <span class="num">0</span>, y: <span class="num">4</span>)
+    <span class="kw">static let</span> high   = <span class="type">PRShadow</span>(color: .black.opacity(<span class="num">0.28</span>), radius: <span class="num">16</span>, x: <span class="num">0</span>, y: <span class="num">8</span>)
+    <span class="kw">static let</span> brand  = <span class="type">PRShadow</span>(color: <span class="type">Color</span>.prBrand.opacity(<span class="num">0.35</span>), radius: <span class="num">16</span>, x: <span class="num">0</span>, y: <span class="num">6</span>)
+    <span class="kw">static let</span> accent = <span class="type">PRShadow</span>(color: <span class="type">Color</span>.prAccent.opacity(<span class="num">0.30</span>), radius: <span class="num">16</span>, x: <span class="num">0</span>, y: <span class="num">6</span>)
+}</code></pre>
+
+<!-- ── Animation ──────────────────────────────────────────────── -->
+<h2 class="section" id="animation">Design Tokens — Animation</h2>
+
+<pre><code><span class="kw">enum</span> <span class="type">PRAnimation</span> {
+    <span class="kw">static let</span> standard    = <span class="type">Animation</span>.easeInOut(duration: <span class="num">0.25</span>)   <span class="cmt">// Screen transitions</span>
+    <span class="kw">static let</span> quick       = <span class="type">Animation</span>.easeOut(duration: <span class="num">0.15</span>)    <span class="cmt">// Button press, toggles</span>
+    <span class="kw">static let</span> celebration = <span class="type">Animation</span>.spring(response: <span class="num">0.4</span>, dampingFraction: <span class="num">0.6</span>) <span class="cmt">// PR banner appear</span>
+    <span class="kw">static let</span> sheet       = <span class="type">Animation</span>.spring(response: <span class="num">0.35</span>, dampingFraction: <span class="num">0.85</span>) <span class="cmt">// Bottom sheet</span>
+}</code></pre>
+
+<!-- ── Components ─────────────────────────────────────────────── -->
+<h2 class="section" id="prbutton">Component — PRButton</h2>
+<p>All interactive buttons in the app use PRButton or follow its spec. Four variants. Never create ad-hoc button styling in views.</p>
+
+<pre><code><span class="kw">enum</span> <span class="type">PRButtonVariant</span> { <span class="kw">case</span> primary, secondary, destructive, ghost }
+
+<span class="kw">struct</span> <span class="type">PRButton</span>: <span class="type">View</span> {
+    <span class="kw">let</span> label: <span class="type">String</span>
+    <span class="kw">var</span> variant: <span class="type">PRButtonVariant</span> = .primary
+    <span class="kw">var</span> icon: <span class="type">String</span>? = <span class="kw">nil</span>           <span class="cmt">// SF Symbol name</span>
+    <span class="kw">var</span> isLoading: <span class="type">Bool</span> = <span class="kw">false</span>
+    <span class="kw">var</span> isDisabled: <span class="type">Bool</span> = <span class="kw">false</span>
+    <span class="kw">let</span> action: () -> <span class="type">Void</span>
+
+    <span class="kw">var</span> body: some <span class="type">View</span> {
+        <span class="type">Button</span>(action: action) {
+            <span class="type">HStack</span>(spacing: <span class="num">8</span>) {
+                <span class="kw">if</span> isLoading { <span class="type">ProgressView</span>().tint(labelColor).scaleEffect(<span class="num">0.85</span>) }
+                <span class="kw">if let</span> icon { <span class="type">Image</span>(systemName: icon) }
+                <span class="type">Text</span>(label).font(buttonFont)
+            }
+            .foregroundColor(labelColor)
+            .frame(maxWidth: .infinity)
+            .frame(height: <span class="type">PRSpacing</span>.buttonHeight)
+            .background(bgColor)
+            .overlay(<span class="type">RoundedRectangle</span>(cornerRadius: <span class="type">PRRadius</span>.pill)
+                .stroke(<span class="type">Color</span>.prBrand, lineWidth: variant == .secondary ? <span class="num">1.5</span> : <span class="num">0</span>))
+            .clipShape(<span class="type">Capsule</span>())
+            .shadow(color: shadowColor, radius: shadowRadius, x: <span class="num">0</span>, y: <span class="num">6</span>)
+        }
+        .disabled(isDisabled || isLoading)
+        .accessibilityLabel(label)
+    }
+    <span class="kw">private var</span> bgColor: <span class="type">Color</span> {
+        <span class="kw">switch</span> variant {
+        <span class="kw">case</span> .primary:     <span class="kw">return</span> isDisabled ? .prBackgroundTer : .prBrand
+        <span class="kw">case</span> .secondary:   <span class="kw">return</span> .clear
+        <span class="kw">case</span> .destructive: <span class="kw">return</span> .prError
+        <span class="kw">case</span> .ghost:       <span class="kw">return</span> .clear
+        }
+    }
+    <span class="kw">private var</span> labelColor: <span class="type">Color</span> {
+        <span class="kw">switch</span> variant {
+        <span class="kw">case</span> .primary:     <span class="kw">return</span> isDisabled ? .prTextTertiary : .prTextOnBrand
+        <span class="kw">case</span> .secondary:   <span class="kw">return</span> .prBrandLight
+        <span class="kw">case</span> .destructive: <span class="kw">return</span> .white
+        <span class="kw">case</span> .ghost:       <span class="kw">return</span> .prTextSecondary
+        }
+    }
+    <span class="kw">private var</span> buttonFont: <span class="type">Font</span> {
+        variant == .secondary ? .prButtonSecondary : .prButtonPrimary
+    }
+    <span class="kw">private var</span> shadowColor: <span class="type">Color</span>  { variant == .primary && !isDisabled ? <span class="type">Color</span>.prBrand.opacity(<span class="num">0.35</span>) : .clear }
+    <span class="kw">private var</span> shadowRadius: <span class="type">CGFloat</span> { variant == .primary ? <span class="num">16</span> : <span class="num">0</span> }
+}</code></pre>
+
+<h2 class="section" id="prcard">Component — PRCard</h2>
+<pre><code><span class="kw">struct</span> <span class="type">PRCard</span>&lt;Content: <span class="type">View</span>&gt;: <span class="type">View</span> {
+    <span class="kw">var</span> padding: <span class="type">CGFloat</span> = <span class="type">PRSpacing</span>.cardPadding
+    <span class="kw">var</span> radius: <span class="type">CGFloat</span>  = <span class="type">PRRadius</span>.large
+    @<span class="type">ViewBuilder</span> <span class="kw">let</span> content: () -> Content
+
+    <span class="kw">var</span> body: some <span class="type">View</span> {
+        content()
+            .padding(padding)
+            .background(<span class="type">Color</span>.prBackgroundSec)
+            .clipShape(<span class="type">RoundedRectangle</span>(cornerRadius: radius))
+            .overlay(<span class="type">RoundedRectangle</span>(cornerRadius: radius)
+                .stroke(<span class="type">Color</span>.prBorder, lineWidth: <span class="num">1</span>))
+            .shadow(color: <span class="type">PRShadow</span>.low.color, radius: <span class="type">PRShadow</span>.low.radius,
+                    x: <span class="type">PRShadow</span>.low.x, y: <span class="type">PRShadow</span>.low.y)
+    }
+}</code></pre>
+
+<h2 class="section" id="navbar">Component — PRNavBar</h2>
+<pre><code><span class="kw">struct</span> <span class="type">PRNavBar</span>: <span class="type">View</span> {
+    <span class="kw">var</span> title: <span class="type">String</span>                    = <span class="str">""</span>
+    <span class="kw">var</span> leadingAction: (() -> <span class="type">Void</span>)?      = <span class="kw">nil</span>
+    <span class="kw">var</span> trailingContent: <span class="type">AnyView</span>?        = <span class="kw">nil</span>
+    <span class="kw">var</span> showDivider: <span class="type">Bool</span>                = <span class="kw">true</span>
+
+    <span class="kw">var</span> body: some <span class="type">View</span> {
+        <span class="type">HStack</span>(spacing: <span class="num">0</span>) {
+            <span class="cmt">// Leading — 36pt wide</span>
+            <span class="type">Group</span> {
+                <span class="kw">if let</span> action = leadingAction {
+                    <span class="type">Button</span>(action: action) {
+                        <span class="type">Image</span>(systemName: <span class="str">"chevron.left"</span>)
+                            .font(.system(size: <span class="num">17</span>, weight: .semibold))
+                            .foregroundColor(.prBrandLight)
+                    }
+                }
+            }.frame(width: <span class="num">36</span>, alignment: .leading)
+
+            <span class="type">Spacer</span>()
+            <span class="type">Text</span>(title).font(.prHeadlineMedium).foregroundColor(.prTextPrimary)
+            <span class="type">Spacer</span>()
+
+            <span class="cmt">// Trailing — 36pt wide</span>
+            <span class="type">Group</span> { trailingContent }.frame(width: <span class="num">36</span>, alignment: .trailing)
+        }
+        .padding(.horizontal, <span class="type">PRSpacing</span>.screenHorizontal)
+        .frame(height: <span class="num">50</span>)
+        .background(<span class="type">Color</span>.prBackground)
+        .<span class="kw">if</span>(showDivider) { $<span class="num">0</span>.overlay(<span class="type">Color</span>.prBorder.frame(height: <span class="num">1</span>), alignment: .bottom) }
+    }
+}</code></pre>
+
+<h2 class="section" id="tabbar">Component — PRTabBar</h2>
+<pre><code><span class="cmt">// Use SwiftUI TabView — customise appearance via UIKit proxy</span>
+<span class="kw">init</span>() {
+    <span class="type">UITabBar</span>.appearance().backgroundColor       = <span class="type">UIColor</span>(<span class="type">Color</span>.prBackgroundSec)
+    <span class="type">UITabBar</span>.appearance().unselectedItemTintColor = <span class="type">UIColor</span>(<span class="type">Color</span>.prTextTertiary)
+}
+
+<span class="type">TabView</span>(selection: $tab) {
+    <span class="type">HomeView</span>().tabItem { <span class="type">Label</span>(<span class="str">"Home"</span>, systemImage: <span class="str">"house.fill"</span>) }.tag(<span class="type">Tab</span>.home)
+    <span class="type">HistoryView</span>().tabItem { <span class="type">Label</span>(<span class="str">"History"</span>, systemImage: <span class="str">"clock.arrow.circlepath"</span>) }.tag(<span class="type">Tab</span>.history)
+    <span class="type">ExerciseLibraryView</span>().tabItem { <span class="type">Label</span>(<span class="str">"Exercises"</span>, systemImage: <span class="str">"list.bullet"</span>) }.tag(<span class="type">Tab</span>.exercises)
+    <span class="type">ProfileView</span>().tabItem { <span class="type">Label</span>(<span class="str">"Profile"</span>, systemImage: <span class="str">"person.circle"</span>) }.tag(<span class="type">Tab</span>.profile)
+}.tint(<span class="type">Color</span>.prBrand)</code></pre>
+
+<h2 class="section" id="prbanner">Component — PRNotificationBanner</h2>
+<div class="callout gold">Appears inline on ActiveWorkoutScreen when a PR is detected. Gold gradient treatment. Springs in with PRAnimation.celebration. Dismissible via swipe or tap ×.</div>
+<pre><code><span class="kw">struct</span> <span class="type">PRNotificationBanner</span>: <span class="type">View</span> {
+    <span class="kw">let</span> exerciseName: <span class="type">String</span>
+    <span class="kw">let</span> newValue: <span class="type">String</span>; <span class="kw">let</span> unit: <span class="type">String</span>
+    <span class="kw">let</span> previousValue: <span class="type">String</span>; <span class="kw">let</span> delta: <span class="type">String</span>
+    <span class="kw">var</span> onTap: (() -> <span class="type">Void</span>)? = <span class="kw">nil</span>
+    <span class="kw">var</span> onDismiss: (() -> <span class="type">Void</span>)? = <span class="kw">nil</span>
+    @<span class="type">State</span> <span class="kw">private var</span> offset: <span class="type">CGFloat</span> = -<span class="num">80</span>
+
+    <span class="kw">var</span> body: some <span class="type">View</span> {
+        <span class="type">HStack</span>(spacing: <span class="num">12</span>) {
+            <span class="cmt">// Trophy circle</span>
+            <span class="type">Circle</span>()
+                .fill(<span class="type">LinearGradient</span>(colors: [.prCelebrationStart, .prCelebrationEnd],
+                    startPoint: .topLeading, endPoint: .bottomTrailing))
+                .frame(width: <span class="num">40</span>, height: <span class="num">40</span>)
+                .overlay(<span class="type">Text</span>(<span class="str">"🏆"</span>).font(.system(size: <span class="num">18</span>)))
+                .shadow(color: .prAccent.opacity(<span class="num">0.35</span>), radius: <span class="num">8</span>, x: <span class="num">0</span>, y: <span class="num">4</span>)
+            <span class="type">VStack</span>(alignment: .leading, spacing: <span class="num">2</span>) {
+                <span class="type">Text</span>(<span class="str">"Personal Record"</span>)
+                    .font(.prCaptionSmall).fontWeight(.bold).textCase(.uppercase)
+                    .tracking(<span class="num">0.5</span>).foregroundColor(.prAccent)
+                <span class="type">Text</span>(<span class="str">"\(exerciseName) · \(newValue) \(unit)"</span>)
+                    .font(.prHeadlineMedium).foregroundColor(.prTextPrimary)
+                <span class="type">Text</span>(<span class="str">"Previous: \(previousValue) · "</span> + delta)
+                    .font(.prCaption).foregroundColor(.prTextSecondary)
+                    + <span class="type">Text</span>(delta).font(.prCaption).foregroundColor(.prSuccess)
+            }
+            <span class="type">Spacer</span>()
+            <span class="kw">if let</span> dismiss = onDismiss {
+                <span class="type">Button</span>(action: dismiss) {
+                    <span class="type">Image</span>(systemName: <span class="str">"xmark"</span>)
+                        .font(.system(size: <span class="num">12</span>, weight: .semibold))
+                        .foregroundColor(.prTextTertiary)
+                }.accessibilityLabel(<span class="str">"Dismiss"</span>)
+            }
+        }
+        .padding(<span class="num">14</span>)
+        .background(<span class="type">LinearGradient</span>(
+            colors: [<span class="type">Color</span>.prCelebrationStart.opacity(<span class="num">0.12</span>), <span class="type">Color</span>.prCelebrationEnd.opacity(<span class="num">0.06</span>)],
+            startPoint: .topLeading, endPoint: .bottomTrailing))
+        .overlay(<span class="type">RoundedRectangle</span>(cornerRadius: <span class="type">PRRadius</span>.large)
+            .stroke(<span class="type">Color</span>.prAccent.opacity(<span class="num">0.30</span>), lineWidth: <span class="num">1</span>))
+        .clipShape(<span class="type">RoundedRectangle</span>(cornerRadius: <span class="type">PRRadius</span>.large))
+        .offset(y: offset)
+        .onAppear { <span class="kw">withAnimation</span>(<span class="type">PRAnimation</span>.celebration) { offset = <span class="num">0</span> } }
+        .onTapGesture { onTap?() }
+    }
+}</code></pre>
+
+<h2 class="section" id="sheet">Component — PRBottomSheet</h2>
+<pre><code><span class="cmt">// Use native .sheet() modifier with custom detents for most cases.
+// For EditSetSheet use a custom presentation with fixed height detent.</span>
+.<span class="kw">sheet</span>(isPresented: $showEditSet) {
+    <span class="type">EditSetSheetView</span>(set: selectedSet)
+        .presentationDetents([.fraction(<span class="num">0.62</span>)])
+        .presentationDragIndicator(.visible)
+        .presentationBackground(<span class="type">Color</span>.prBackgroundSec)
+}
+<span class="cmt">// PRWarningBanner inside the sheet — show IMMEDIATELY on appear, not after interaction:</span>
+<span class="type">PRWarningBanner</span>(message: <span class="str">"Editing this set will recalculate your personal record"</span>)
+    .padding(.horizontal, <span class="num">16</span>)
+    .onAppear() <span class="cmt">// No animation delay — fires on sheet appear</span></code></pre>
+
+<h2 class="section" id="dialog">Component — PRConfirmationDialog</h2>
+<pre><code><span class="cmt">// Use SwiftUI .confirmationDialog() for Delete workout
+// Do NOT use .alert() — confirmationDialog gives the correct sheet-style presentation</span>
+.<span class="kw">confirmationDialog</span>(
+    <span class="str">"Delete workout?"</span>,
+    isPresented: $showDeleteConfirm,
+    titleVisibility: .visible
+) {
+    <span class="type">Button</span>(<span class="str">"Delete workout"</span>, role: .destructive) { deleteWorkout() }
+    <span class="type">Button</span>(<span class="str">"Cancel"</span>, role: .cancel) {}
+} message: {
+    <span class="type">Text</span>(<span class="str">"This will permanently delete this workout and all its sets. Your personal records may be updated."</span>)
+}
+<span class="cmt">// For the centered dialog design shown in the spec, use a custom modal overlay instead:
+// ZStack { background.blur(radius: 2); PRDeleteDialogCard(onDelete:, onCancel:) }</span></code></pre>
+
+<h2 class="section" id="video">Component — PRVideoPlayerCard</h2>
+<pre><code><span class="cmt">// ExerciseDetailScreen: load video from ExerciseDB demo_url
+// Use VideoPlayer from AVKit. If URL is nil or fails to load → show PRBodyDiagram.</span>
+<span class="kw">import</span> AVKit
+
+<span class="kw">struct</span> <span class="type">PRVideoPlayerCard</span>: <span class="type">View</span> {
+    <span class="kw">let</span> demoURL: <span class="type">URL</span>?
+    <span class="kw">let</span> exerciseName: <span class="type">String</span>
+    <span class="kw">let</span> primaryMuscle: <span class="type">String</span>
+    @<span class="type">State</span> <span class="kw">private var</span> loadFailed = <span class="kw">false</span>
+
+    <span class="kw">var</span> body: some <span class="type">View</span> {
+        <span class="type">Group</span> {
+            <span class="kw">if let</span> url = demoURL, !loadFailed {
+                <span class="type">VideoPlayer</span>(player: <span class="type">AVPlayer</span>(url: url))
+                    .onAppear { <span class="cmt">/* set up player */</span> }
+                    .overlay(<span class="cmt">/* bottom gradient + title */</span>)
+            } <span class="kw">else</span> {
+                <span class="type">PRBodyDiagram</span>(primaryMuscles: [primaryMuscle])
+            }
+        }
+        .frame(height: <span class="num">200</span>)
+        .clipShape(<span class="type">RoundedRectangle</span>(cornerRadius: <span class="type">PRRadius</span>.large))
+        .overlay(<span class="type">RoundedRectangle</span>(cornerRadius: <span class="type">PRRadius</span>.large)
+            .stroke(<span class="type">Color</span>.prBorder, lineWidth: <span class="num">1</span>))
+    }
+}
+<span class="cmt">// loadFailed = true when: demoURL == nil, OR AVPlayer fires .failed status</span></code></pre>
+
+<h2 class="section" id="bodydiagram">Component — PRBodyDiagram</h2>
+<pre><code><span class="cmt">// SVG-style body diagram using SwiftUI shapes/paths.
+// Primary muscle: Color.prBrand opacity 0.82
+// Secondary muscles: Color.prBrandLight opacity 0.50
+// All other areas: Color.prTextTertiary opacity 0.15–0.22
+// Render as Canvas or Path-based SwiftUI shapes.
+// Muscle group identifiers match ExerciseDB API muscle field values:</span>
+<span class="kw">enum</span> <span class="type">MuscleGroup</span>: <span class="type">String</span> {
+    <span class="kw">case</span> chest, back, shoulders, biceps, triceps, quadriceps, hamstrings, calves, glutes, abs
+}
+<span class="cmt">// See design spec: screens/screens-extra.jsx BodyDiagram() for SVG path reference</span></code></pre>
+
+<h2 class="section" id="progressdots">Component — PRProgressDots</h2>
+<pre><code><span class="cmt">// Onboarding step indicator. Active step: wide pill (20pt), others: circle (6pt).</span>
+<span class="kw">struct</span> <span class="type">PRProgressDots</span>: <span class="type">View</span> {
+    <span class="kw">let</span> total: <span class="type">Int</span>
+    <span class="kw">let</span> current: <span class="type">Int</span>  <span class="cmt">// 1-indexed</span>
+
+    <span class="kw">var</span> body: some <span class="type">View</span> {
+        <span class="type">HStack</span>(spacing: <span class="num">6</span>) {
+            <span class="type">ForEach</span>(<span class="num">1</span>...<span class="kw">total</span>, id: \.self) { step <span class="kw">in</span>
+                <span class="type">RoundedRectangle</span>(cornerRadius: <span class="num">999</span>)
+                    .fill(step == current ? <span class="type">Color</span>.prBrand : <span class="type">Color</span>.prBackgroundTer)
+                    .frame(width: step == current ? <span class="num">20</span> : <span class="num">6</span>, height: <span class="num">6</span>)
+                    .animation(<span class="type">PRAnimation</span>.standard, value: current)
+            }
+        }
+    }
+}
+<span class="cmt">// Usage: PRProgressDots(total: 4, current: viewModel.step)</span></code></pre>
+
+<div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
+  <p style="color:var(--t3);font-size:12px;">PRLifts Design System v2.0 · Obsidian × Velocity Hybrid · Approved April 2026</p>
+  <p style="margin-top:6px;"><a href="handoff-screens.html">→ Continue to Screen Specs</a></p>
+</div>
+</main>
+</body>
+</html>
