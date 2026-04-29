@@ -150,6 +150,15 @@ Analytics event names use snake_case prefixed with `screen_`:
 - **Actions:** Tap to expand detail (→ PersonalRecordDetailScreen)
 - **Notes:** Not a full screen. Displayed inline above the set logging area.
 
+### EditSetSheet
+- **Route:** N/A (inline bottom sheet on ActiveWorkoutScreen and WorkoutDetailScreen)
+- **Analytics:** `sheet_edit_set_opened`, `sheet_edit_set_saved`, `sheet_edit_set_cancelled`
+- **Required data:** WorkoutSet (reps, weight, weight_modifier, notes)
+- **Actions:** Edit reps, weight, weight_modifier; save (triggers PR recalculation); cancel; delete set (with confirmation)
+- **Notes:** Not a full screen. Presented as a bottom sheet over the calling screen.
+  Save triggers automatic PR re-evaluation for the exercise (Decision 87).
+  Delete requires a confirmation alert before committing.
+
 ### WorkoutCompleteScreen
 - **Route:** `/workout/complete`
 - **Analytics:** `screen_workout_complete`
@@ -189,14 +198,16 @@ Analytics event names use snake_case prefixed with `screen_`:
   or create a custom exercise."
 
 ### ExerciseDetailScreen
-- **Route:** `/exercises/detail/{exercise_id}`
+- **Route:** `/exercises/{id}`
 - **Analytics:** `screen_exercise_detail`
-- **Required data:** Exercise, demo_url (if available), user's PR for
-  this exercise (if any)
-- **Actions:** Add to current workout (if workout active),
+- **Required data:** Exercise (name, video URL, muscle groups, instructions),
+  user's PR for this exercise (if any)
+- **Actions:** Play exercise video (AVPlayer, if demo_url present),
+  Add to workout CTA (active workout only, → ActiveWorkoutScreen),
   view PR history for this exercise (→ PRHistoryScreen)
-- **Notes:** Demo shown as GIF or video from ExerciseDB.
-  Custom exercises show no demo.
+- **Notes:** Video played via AVPlayer. Custom exercises show no video.
+  Primary and secondary muscle groups displayed. Instructions shown below video.
+  Add to workout CTA only visible when a workout is in progress.
 
 ### PersonalRecordDetailScreen
 - **Route:** `/records/detail/{record_id}`
@@ -310,7 +321,7 @@ Analytics event names use snake_case prefixed with `screen_`:
 | Phase 1 onboarding | 4 |
 | Phase 2 onboarding | 5 |
 | Main app | 14 |
-| Components (inline) | 2 |
+| Components (inline) | 3 |
 | Error/system | 2 |
-| **V1 total** | **27** |
+| **V1 total** | **28** |
 
