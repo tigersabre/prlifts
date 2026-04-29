@@ -84,15 +84,15 @@
 
 ---
 
-### 5. ExerciseDB (via RapidAPI)
+### 5. ExerciseDB / ASCEND API (via RapidAPI)
 
 | Field | Detail |
 |---|---|
-| **Purpose** | Exercise library: exercise definitions, GIF demos |
+| **Purpose** | Exercise library: exercise definitions, GIF demos, video URLs |
 | **Data received** | No user data — read-only API calls for exercise catalogue |
 | **Data classification** | None (no user data) |
 | **DPA status** | N/A — no user data transmitted |
-| **Notes** | Exercise data is cached in Supabase after seeding. Ongoing API calls are for fresh data only, not user-specific queries. |
+| **Notes** | Exercise data (including video URLs) is cached in Supabase after seeding. The `demo_url` field on the `exercise` table stores the EDB-provided video URL. Video content is served directly from EDB/RapidAPI CDN — PRLifts does not proxy or re-host video content. Ongoing API calls are for fresh data only, not user-specific queries. Using EDB v2 by ASCEND API (11,000+ exercises, includes videos/GIFs/images — Decision 76). |
 
 ---
 

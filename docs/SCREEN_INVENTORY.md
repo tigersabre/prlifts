@@ -152,12 +152,19 @@ Analytics event names use snake_case prefixed with `screen_`:
 
 ### EditSetSheet
 - **Route:** N/A (inline bottom sheet on ActiveWorkoutScreen and WorkoutDetailScreen)
-- **Analytics:** `sheet_edit_set_opened`, `sheet_edit_set_saved`, `sheet_edit_set_cancelled`
-- **Required data:** WorkoutSet (reps, weight, weight_modifier, notes)
-- **Actions:** Edit reps, weight, weight_modifier; save (triggers PR recalculation); cancel; delete set (with confirmation)
+- **Analytics:** `sheet_edit_set_opened`, `sheet_edit_set_saved`, `sheet_edit_set_cancelled`,
+  `sheet_edit_set_deleted`
+- **Required data:** WorkoutSet (reps, weight, weight_modifier, notes), PR status of this set
+- **Actions:** Edit reps, weight, weight_modifier, notes; save (triggers PR recalculation);
+  cancel; delete set (with confirmation alert on the sheet)
 - **Notes:** Not a full screen. Presented as a bottom sheet over the calling screen.
-  Save triggers automatic PR re-evaluation for the exercise (Decision 87).
-  Delete requires a confirmation alert before committing.
+  **PR warning:** If the set being edited is the basis for a PersonalRecord, a warning
+  appears inline when the sheet opens — before any edits are made, not after save.
+  Warning copy: "This set is a personal record. Editing or deleting it may update
+  your records."
+  **Delete:** Available directly on this sheet (not a separate screen). Tapping Delete
+  shows a confirmation alert: "Delete this set? Your personal records may be updated."
+  Confirmed delete triggers PR recalculation across all historical sets (Decision 87).
 
 ### WorkoutCompleteScreen
 - **Route:** `/workout/complete`
@@ -201,13 +208,15 @@ Analytics event names use snake_case prefixed with `screen_`:
 - **Route:** `/exercises/{id}`
 - **Analytics:** `screen_exercise_detail`
 - **Required data:** Exercise (name, video URL, muscle groups, instructions),
-  user's PR for this exercise (if any)
+  user's PR for this exercise (if any), active workout state
 - **Actions:** Play exercise video (AVPlayer, if demo_url present),
-  Add to workout CTA (active workout only, → ActiveWorkoutScreen),
-  view PR history for this exercise (→ PRHistoryScreen)
+  contextual workout CTA (see Notes), view PR history (→ PRHistoryScreen)
 - **Notes:** Video played via AVPlayer. Custom exercises show no video.
   Primary and secondary muscle groups displayed. Instructions shown below video.
-  Add to workout CTA only visible when a workout is in progress.
+  **Contextual CTA (Decision 89):**
+  — Workout in progress: "Add to workout" (→ ActiveWorkoutScreen, exercise appended)
+  — No active workout: "Start workout with this exercise" (→ ActiveWorkoutScreen,
+    new workout created with this exercise pre-loaded)
 
 ### PersonalRecordDetailScreen
 - **Route:** `/records/detail/{record_id}`
