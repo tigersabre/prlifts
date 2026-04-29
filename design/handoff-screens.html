@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PRLifts — Screen Specs</title>
+<style>
+:root {
+  --bg:#080A14;--bg2:#10132A;--bg3:#1A1E40;--bg4:#232756;
+  --brand:#1A3FBF;--brandlt:#2D5BE3;
+  --accent:#FFB300;--success:#00DFA2;--error:#FF453A;--warn:#FF9F0A;
+  --text:#fff;--t2:rgba(210,220,255,.65);--t3:rgba(210,220,255,.32);
+  --border:rgba(45,91,227,.18);
+  --font:-apple-system,'SF Pro Text','DM Sans',system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;display:flex;min-height:100vh;}
+nav{width:220px;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;}
+nav .back{display:block;padding:8px 18px 14px;font-size:13px;color:var(--brandlt);text-decoration:none;border-bottom:1px solid var(--border);margin-bottom:8px;}
+nav h2{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3);padding:0 18px;margin-bottom:4px;margin-top:14px;}
+nav a{display:block;padding:5px 18px;font-size:13px;color:var(--t2);text-decoration:none;}
+nav a:hover{color:var(--text);background:var(--bg3);}
+main{flex:1;padding:36px 48px;max-width:960px;}
+h1{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px;}
+.screen{margin-bottom:0;padding:36px 0;border-top:1px solid var(--border);}
+.screen:first-of-type{border-top:none;padding-top:0;}
+.screen-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:18px;}
+.screen-num{font-size:11px;font-weight:700;color:var(--t3);background:var(--bg3);border-radius:6px;padding:3px 8px;white-space:nowrap;margin-top:3px;}
+.screen-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:3px;}
+.screen-route{font-family:var(--mono);font-size:12px;color:var(--t3);}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.box-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t3);margin-bottom:6px;}
+.box-content{font-size:13px;color:var(--t2);line-height:1.5;}
+.box-content li{margin-left:14px;margin-bottom:3px;}
+.box-content code{font-family:var(--mono);font-size:11px;color:var(--brandlt);}
+.box-content strong{color:var(--text);font-weight:600;}
+pre{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:8px 0 14px;font-family:var(--mono);font-size:12px;line-height:1.6;color:rgba(210,220,255,.88);}
+.kw{color:#7C9FFF;}.str{color:#00DFA2;}.cmt{color:rgba(210,220,255,.35);font-style:italic;}.type{color:#FFB300;}.num{color:#FF9F0A;}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-right:4px;margin-bottom:4px;}
+.tag.blue{background:rgba(26,63,191,.2);color:var(--brandlt);}
+.tag.gold{background:rgba(255,179,0,.15);color:var(--accent);}
+.tag.mint{background:rgba(0,223,162,.12);color:var(--success);}
+.tag.red{background:rgba(255,69,58,.12);color:var(--error);}
+.tag.warn{background:rgba(255,159,10,.12);color:var(--warn);}
+.tag.gray{background:var(--bg3);color:var(--t2);}
+.callout{border-radius:10px;padding:11px 14px;margin:10px 0 14px;border:1px solid;font-size:13px;}
+.callout.gold{background:rgba(255,179,0,.10);border-color:rgba(255,179,0,.28);color:var(--accent);}
+.callout.mint{background:rgba(0,223,162,.10);border-color:rgba(0,223,162,.25);color:var(--success);}
+.callout.blue{background:rgba(26,63,191,.15);border-color:rgba(45,91,227,.30);color:var(--brandlt);}
+.callout.warn{background:rgba(255,159,10,.10);border-color:rgba(255,159,10,.28);color:var(--warn);}
+.callout.red{background:rgba(255,69,58,.10);border-color:rgba(255,69,58,.28);color:var(--error);}
+table{width:100%;border-collapse:collapse;margin:8px 0 14px;font-size:13px;}
+th{text-align:left;padding:7px 10px;background:var(--bg3);color:var(--t3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);}
+td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--t2);vertical-align:top;}
+td code{font-family:var(--mono);font-size:11px;color:var(--brandlt);}
+td:first-child{color:var(--text);font-weight:600;}
+</style>
+</head>
+<body>
+<nav>
+  <a href="Handoff Bundle.html" class="back">← Tokens &amp; Components</a>
+  <h2>Onboarding</h2>
+  <a href="#s01">01 WelcomeScreen</a>
+  <a href="#s02">02 SignInScreen</a>
+  <a href="#s03">03 DisplayNameScreen</a>
+  <a href="#s04">04 UnitPreferenceScreen</a>
+  <h2>Core App</h2>
+  <a href="#s05">05 HomeScreen</a>
+  <a href="#s06">06 ActiveWorkoutScreen</a>
+  <a href="#s07">07 WorkoutSummaryScreen</a>
+  <a href="#s08">08 PRDetailScreen</a>
+  <h2>Additional</h2>
+  <a href="#s09">09 ExerciseDetailScreen</a>
+  <a href="#s10">10 EditSetSheet</a>
+  <a href="#s11">11 DeleteWorkoutDialog</a>
+</nav>
+<main>
+<h1 style="margin-bottom:4px;">PRLifts — Screen Specs</h1>
+<p style="color:var(--t3);font-size:13px;margin-bottom:32px;">11 screens · v2.0 · Read <a href="Handoff Bundle.html">Handoff Bundle.html</a> first for token and component definitions.</p>
+
+<!-- ── 01 WelcomeScreen ──────────────────────────────────────────── -->
+<div class="screen" id="s01">
+  <div class="screen-header">
+    <div class="screen-num">01</div>
+    <div>
+      <div class="screen-title">WelcomeScreen</div>
+      <div class="screen-route">/onboarding/welcome</div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="tag blue">Phase 1 onboarding</span>
+    <span class="tag gray">First launch only</span>
+    <span class="tag gray">No required data</span>
+  </div>
+  <div class="grid">
+    <div class="box"><div class="box-label">States</div><div class="box-content"><ul>
+      <li><strong>Default</strong> — full hero layout</li>
+      <li>No loading, error, or empty states needed</li>
+    </ul></div></div>
+    <div class="box"><div class="box-label">Actions</div><div class="box-content"><ul>
+      <li>"Get started" → <code>SignInScreen</code></li>
+      <li>"Sign in" link → <code>SignInScreen</code></li>
+    </ul></div></div>
+  </div>
+  <div class="box" style="margin-bottom:12px;"><div class="box-label">Layout — full height VStack</div><div class="box-content">
+    <strong>Background:</strong> <code>prBackground</code> + radial gradient <code>prBrand 22%→0%</code> at top-center<br>
+    <strong>Wordmark:</strong> "PRLifts" — <code>prDisplayLarge</code> (48pt black rounded) · "PR" = <code>prTextPrimary</code>, "Lifts" = <code>prBrand</code><br>
+    <strong>Blue underline:</strong> 40×3pt pill, <code>prBrand</code>, <code>0 0 12pt brandGlow</code> shadow · margin-top 10pt<br>
+    <strong>Tagline:</strong> "Track every lift. Celebrate every PR." · <code>prDisplayMedium</code> (34pt) · centred · margin-top 32pt<br>
+    <strong>Benefits VStack:</strong> spacing 12pt · margin-top 28pt<br>
+    — Each row: 26×26 circle (<code>prSuccessBg</code>) + checkmark SF Symbol + 15pt body text<br>
+    <strong>Get started button:</strong> <code>PRButton(.primary)</code> · width fill · margin-top 36pt<br>
+    <strong>Sign in link:</strong> 14pt · margin-top 14pt · centred<br>
+    <strong>Terms caption:</strong> 11pt <code>prTextTertiary</code> · pinned to bottom safe area
+  </div></div>
+  <div class="callout blue">Not shown on subsequent launches. Gate with a <code>hasCompletedOnboarding</code> flag in UserDefaults (or SwiftData User record).</div>
+</div>
+
+<!-- ── 02 SignInScreen ────────────────────────────────────────────── -->
+<div class="screen" id="s02">
+  <div class="screen-header">
+    <div class="screen-num">02</div>
+    <div><div class="screen-title">SignInScreen</div><div class="screen-route">/onboarding/sign-in</div></div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <span class="tag blue">Phase 1 onboarding</span>
+    <span class="tag gray">No required data</span>
+  </div>
+  <div class="grid">
+    <div class="box"><div class="box-label">States</div><div class="box-content"><ul>
+      <li><strong>Default</strong> — all options visible</li>
+      <li><strong>Error</strong> — inline banner below options</li>
+      <li><strong>Loading</strong> — button shows spinner while auth in flight</li>
+      <li><strong>Network unavailable</strong> — inline error, retry button</li>
+    </ul></div></div>
+    <div class="box"><div class="box-label">Error messages</div><div class="box-content"><ul>
+      <li>Invalid credentials: "Sign in failed. Please try again."</li>
+      <li>Network: "No internet connection. Check your settings."</li>
+      <li>Apple/Google failure: "Sign in with [provider] failed. Try another method."</li>
+    </ul></div></div>
+  </div>
+  <div class="box" style="margin-bottom:12px;"><div class="box-label">Layout</div><div class="box-content">
+    <strong>NavBar:</strong> empty (no title, no back button) · no divider<br>
+    <strong>Title:</strong> "Sign in to PRLifts" · <code>prDisplayMedium</code> (34pt) · margin-top 12pt<br>
+    <strong>Subtitle:</strong> "Create an account or sign in to continue" · <code>prBodySecondary</code> · <code>prTextSecondary</code><br>
+    <strong>Apple button:</strong> height 52pt · <code>prTextPrimary</code> background · <code>prBackground</code> text · Apple logo SF Symbol <code>apple.logo</code> · margin-top 32pt<br>
+    <strong>Google button:</strong> height 52pt · <code>prBackgroundSec</code> bg · <code>prBorder</code> stroke 1.5pt · Google G logo (bundled asset)<br>
+    <strong>Divider:</strong> "or continue with email" · 13pt <code>prTextTertiary</code> · margin-top/bottom 20pt<br>
+    <strong>Email input:</strong> <code>PRTextFieldStyle</code> · height 48pt · <code>prBackgroundTer</code> bg · keyboard .emailAddress<br>
+    <strong>Continue button:</strong> <code>PRButton(.primary)</code> · margin-top 12pt<br>
+    <strong>Error banner:</strong> <code>prErrorBg</code> + <code>prError 40%</code> border · appears above Terms with spring animation<br>
+    <strong>Terms:</strong> 12pt · bottom safe area · "Terms" and "Privacy Policy" tappable in <code>prBrandLight</code>
+  </div></div>
+  <div class="callout blue">Handles both new account creation and returning user sign-in from the same screen. After successful auth, check if display_name is set. If set → <code>HomeScreen</code>. If not → <code>DisplayNameScreen</code>.</div>
+</div>
+
+<!-- ── 03 DisplayNameScreen ───────────────────────────────────────── -->
+<div class="screen" id="s03">
+  <div class="screen-header">
+    <div class="screen-num">03</div>
+    <div><div class="screen-title">DisplayNameScreen</div><div class="screen-route">/onboarding/display-name</div></div>
+  </div>
+  <div style="margin-bottom:10px;"><span class="tag blue">Phase 1 onboarding</span><span class="tag gray">Step 3 of 4</span></div>
+  <div class="grid">
+    <div class="box"><div class="box-label">States</div><div class="box-content"><ul>
+      <li><strong>Empty</strong> — cursor in field, Continue disabled</li>
+      <li><strong>Filled</strong> — Continue enabled (shown in spec)</li>
+      <li><strong>Error</strong> — inline "Please enter a display name" if Continue tapped while empty</li>
+    </ul></div></div>
+    <div class="box"><div class="box-label">Validation</div><div class="box-content"><ul>
+      <li>Min: 1 character</li>
+      <li>Max: 50 characters</li>
+      <li>Prefill from auth provider display name if available</li>
+      <li>Cannot be skipped — no skip option</li>
+    </ul></div></div>
+  </div>
+  <div class="box" style="margin-bottom:12px;"><div class="box-label">Layout</div><div class="box-content">
+    <strong>NavBar:</strong> back chevron → SignInScreen · no title<br>
+    <strong>PRProgressDots:</strong> total=4 current=3 · margin-top 28pt<br>
+    <strong>Headline:</strong> "What should we call you?" · <code>prDisplayMedium</code> · margin-top 0<br>
+    <strong>Subtitle:</strong> "This is how you'll appear across your PRLifts profile." · <code>prBodySecondary</code> · <code>prTextSecondary</code><br>
+    <strong>Field label:</strong> "Display name" · 13pt semibold · <code>prTextSecondary</code> · margin-top 36pt<br>
+    <strong>Input:</strong> height 52pt · <code>prBackgroundTer</code> bg · focused: 2pt <code>prBrandLight</code> border + <code>prBrandSubtle</code> outer glow · cursor blinking<br>
+    <strong>Character hint:</strong> "Up to 50 characters" · 12pt <code>prTextTertiary</code> · margin-top 6pt<br>
+    <strong>Continue:</strong> <code>PRButton(.primary)</code> · margin-top 36pt · disabled until valid<br>
+    <strong>Step label:</strong> "Step 3 of 4" · 14pt <code>prTextTertiary</code> · pinned bottom
+  </div></div>
+</div>
+
+<!-- ── 04 UnitPreferenceScreen ────────────────────────────────────── -->
+<div class="screen" id="s04">
+  <div class="screen-header">
+    <div class="screen-num">04</div>
+    <div><div class="screen-title">UnitPreferenceScreen</div><div class="screen-route">/onboarding/units</div></div>
+  </div>
+  <div style="margin-bottom:10px;"><span class="tag blue">Phase 1 onboarding</span><span class="tag gray">Step 4 of 4</span><span class="tag gray">US default: lbs/in</span></div>
+  <div class="box" style="margin-bottom:12px;"><div class="box-label">Layout</div><div class="box-content">
+    <strong>NavBar:</strong> back → DisplayNameScreen · no title<br>
+    <strong>PRProgressDots:</strong> total=4 current=4<br>
+    <strong>Headline:</strong> "How do you measure?" · <code>prDisplayMedium</code><br>
+    <strong>Subtitle:</strong> "You can change this anytime in settings." · margin-bottom 32pt<br>
+    <strong>Section label:</strong> "Weight" · 13pt bold <code>prTextTertiary</code> uppercase · letter-spacing 0.6pt<br>
+    <strong>Unit cards (HStack, gap 10pt):</strong> each card flex:1 · height ~90pt · corner radius 16pt<br>
+    — Selected: <code>prBrand 18%</code> bg · 2pt <code>prBrand</code> border · outer 1pt solid <code>prBrand</code> glow<br>
+    — Unselected: <code>prBackgroundSec</code> · 1pt <code>prBorder</code> border<br>
+    — Label: <code>prDisplayMedium</code> (28pt rounded) · selected: <code>prBrand</code> / unselected: <code>prTextSecondary</code><br>
+    — Sublabel: 13pt · selected: <code>prBrandLight</code> / unselected: <code>prTextTertiary</code><br>
+    <strong>Height section:</strong> same pattern · margin-top 24pt<br>
+    <strong>Continue:</strong> "Start tracking" · <code>PRButton(.primary)</code> · margin-top 36pt<br>
+    <strong>Step label:</strong> "Step 4 of 4 — almost there" · pinned bottom
+  </div></div>
+  <div class="callout blue">Default selection: locale-based. <code>Locale.current.measurementSystem</code> → <code>.metric</code> → kg/cm. <code>.us</code> → lbs/in. Store as <code>User.weightUnit</code> and <code>User.heightUnit</code> after Continue.</div>
+</div>
+
+<!-- ── 05 HomeScreen ──────────────────────────────────────────────── -->
+<div class="screen" id="s05">
+  <div class="screen-header">
+    <div class="screen-num">05</div>
+    <div><div class="screen-title">HomeScreen</div><div class="screen-route">/home</div></div>
+  </div>
+  <div style="margin-bottom:10px;"><span class="tag blue">Main app</span><span class="tag gray">Primary landing screen</span></div>
+  <div class="grid">
+    <div class="box"><div class="box-label">Required data</div><div class="box-content"><ul>
+      <li>User.displayName, User.currentStreak</li>
+      <li>Last 2 PersonalRecords (exercise name, value, unit, delta, date)</li>
+      <li>Aggregate: totalWorkouts, totalPRs</li>
+      <li>FutureSelfImage URL (optional — hide card if nil + no consent)</li>
+    </ul></div></div>
+    <div class="box"><div class="box-label">States</div><div class="box-content"><ul>
+      <li><strong>Loading</strong> — skeleton cards for streak + PRs + stats</li>
+      <li><strong>Empty (no workouts)</strong> — replace PR list with PREmptyState: barbell icon, "No workouts yet", "Log your first workout" CTA</li>
+      <li><strong>Populated</strong> — shown in spec</li>
+      <li><strong>Offline</strong> — OfflineBanner at top</li>
+    </ul></div></div>
+  </div>
+  <div class="box" style="margin-bottom:12px;"><div class="box-label">Layout — ScrollView VStack gap 10pt, horizontal padding 16pt</div><div class="box-content">
+    <strong>NavBar:</strong> "PRLifts" wordmark <code>prHeadlineLarge</code> rounded + user avatar circle right (32×32pt, <code>prBackgroundTer</code>)<br>
+    <strong>Streak card:</strong> <code>PRCard</code> · gradient bg <code>prBrand 22%→8%</code> · border <code>prBrand 40%</code> · icon 48×48pt rounded-14 <code>prBrand</code> · text: greeting 13pt + "X-day streak" <code>prHeadlineLarge</code> · streak bar 7 pills 4pt tall below<br>
+    <strong>Start workout:</strong> <code>PRButton(.primary)</code> · plus icon<br>
+    <strong>Stats grid:</strong> HStack gap 8pt · 2 <code>PRCard</code>s · value <code>prDataLarge</code> in brand/accent · label 12pt <code>prTextSecondary</code><br>
+    <strong>Section header:</strong> "Recent PRs" <code>prHeadlineLarge</code> + "See all →" 13pt <code>prBrandLight</code><br>
+    <strong>PR rows:</strong> <code>PRCard</code> · trophy circle 38×38pt gold gradient · exercise name 15pt bold + date 12pt sec · value <code>prDataMedium</code> + delta 12pt <code>prSuccess</code><br>
+    <strong>Future Self card:</strong> <code>PRCard</code> · gold gradient bg subtle · accent label + subtitle + play arrow icon right
+  </div></div>
+</div>
+
+<!-- ── 06 ActiveWorkoutScreen ─────────────────────────────────────── -->
+<div class="screen" id="s06">
+  <div class="screen-header">
+    <div class="screen-num">06</div>
+    <div><div class="screen-title">ActiveWorkoutScreen</div><div class="screen-route">/workout/active</div></div>
+  </div>
+  <div style="margin-bottom:10px;"><span class="tag blue">Core flow</span><span class="tag gold">PR detection per set</span><span class="tag mint">Offline-capable</span></div>
+  <div class="grid">
+    <div class="box"><div class="box-label">Required data</div><div class="box-content"><ul>
+      <li>Workout (status: in_progress/paused)</li>
+      <li>WorkoutExercises ordered list</li>
+      <li>WorkoutSets for current exercise</li>
+      <li>Timer (elapsed seconds)</li>
+      <li>PersonalRecord (if just detected)</li>
+    </ul></div></div>
+    <div class="box"><div class="box-label">States</div><div class="box-content"><ul>
+      <li><strong>Default</strong> — no PR banner visible</li>
+      <li><strong>PR detected</strong> — banner appears (spring animation)</li>
+      <li><strong>Offline</strong> — OfflineBanner, sets save locally</li>
+      <li><strong>Set logging</strong> — inputs active, Log set button enabled</li>
+    </ul></div></div>
+  </div>
+  <div class="box" style="margin-bottom:12px;"><div class="box-label">Layout</div><div class="box-content">
+    <strong>NavBar:</strong> "Cancel" 14pt <code>prBrandLight</code> left · workout name centred · timer <code>prDataSmall</code> <code>prSuccess</code> right<br>
+    <strong>PRNotificationBanner:</strong> shown when <code>currentPR != nil</code> · margin 10pt horizontal · spring in from top<br>
+    — "Demo" chip right: 13pt · <code>prBackgroundTer</code> · taps → ExerciseDetailScreen (modal)<br>
+    <strong>Set table PRCard:</strong> header row + set rows<br>
+    — Set row: set# <code>prDataSmall</code> <code>prTextSecondary</code> · weight <code>prDataMedium</code> (gold if PR row) · reps <code>prDataMedium</code> · status icon (checkmark circle or 🏆)<br>
+    — PR row background: <code>prAccent 6%</code><br>
+    <strong>Set input PRCard:</strong> "Set N" label · weight + reps inputs HStack · Log set <code>PRButton(.primary)</code> height 44pt<br>
+    <strong>Add exercise row:</strong> dashed border <code>prBorder</code> · 48pt height · taps → ExerciseLibraryScreen (sheet)<br>
+    <strong>Bottom bar:</strong> "Finish workout" <code>PRButton(.primary)</code> height 48pt · border-top <code>prBorder</code>
+  </div></div>
+  <div class="callout mint">All set writes go to SwiftData first (offline-first). PR detection runs in Core Library after each <code>isCompleted = true</code> set. Never call backend directly from this screen.</div>
+</div>
+
+<!-- ── 07 WorkoutSummaryScreen ────────────────────────────────────── -->
+<div class="screen" id="s07">
+  <div class="screen-header">
+    <div class="screen-num">07</div>
+    <div><div class="screen-title">WorkoutSummaryScreen</div><div class="screen-route">/workout/complete</div></div>
+  </div>
+  <div style="margin-bottom:10px;"><span class="tag blue">Core flow</span><span class="tag gold">Gold celebration only here</span><span class="tag mint">Mint for deltas</span></div>
+  <div class="grid">
+    <div class="box"><div class="box-label">Required data</div><div class="box-content"><ul>
+      <li>Completed Workout + all WorkoutSets</li>
+      <li>PersonalRecords[] detected this workout</li>
+      <li>AI insight Job ID (polls until complete)</li>
+      <li>Stats: duration, exercise count, set count, total volume</li>
+    </ul></div></div>
+    <div class="box"><div class="box-label">AI insight states</div><div class="box-content"><ul>
+      <li><strong>Polling</strong> — skeleton shimmer + progressive messages: "Analyzing your workout…" → "Building your insight…"</li>
+      <li><strong>Complete</strong> — insight text appears (spring fade in)</li>
+      <li><strong>Timeout / unavailable</strong> — "Insight unavailable. Try again later." No error UI — just quiet fallback text.</li>
+    </ul></div></div>
+  </div>
+  <div class="box" style="margin-bottom:12px;"><div class="box-label">Layout — ScrollView VStack</div><div class="box-content">
+    <strong>Celebration header:</strong> background gradient <code>celGlow 0%→transparent</code> · "🏆" 52pt emoji · "Workout complete!" <code>prDisplayMedium</code> · date/name caption<br>
+    <strong>Stats 2×2 grid:</strong> 4 <code>PRCard</code>s · value <code>prDataLarge</code> <code>prTextPrimary</code> · label 12pt sec<br>
+    <strong>PR section (gold treatment):</strong> outer border <code>prAccent 40%</code> · header row: <code>celStart→celEnd gradient bg 18%</code> · "🏆 Personal Records" label + count badge (gold gradient pill)<br>
+    — PR rows: <code>celStart 6%</code> background · trophy icon gold gradient · exercise + previous · value <code>prDataMedium</code> <code>prAccent</code> · delta 12pt <code>prSuccess</code><br>
+    <strong>AI insight PRCard:</strong> brain icon + "AI Insight" label 11pt uppercase <code>prBrandLight</code> · 14pt body text or skeleton<br>
+    <strong>Done:</strong> <code>PRButton(.primary)</code> · "View workout details" ghost below
+  </div></div>
+  <div class="callout gold">Gold gradient appears ONLY in the PR section. All positive delta values use <code>prSuccess</code> (mint), not gold. The 🏆 emoji is permitted here (defined celebration moment).</div>
+</div>
+
+<!-- ── 08 PRDetailScreen ──────────────────────────────────────────── -->
+<div class="screen" id="s08">
+  <div class="screen-header">
+    <div class="screen-num">08</div>
+    <div><div class="screen-title">PRDetailScreen</div><div class="screen-route">/records/detail/{record_id}</div></div>
+  </div>
+  <div style="margin-bottom:10px;"><span class="tag blue">Core app</span></div>
+  <div class="grid">
+    <div class="box"><div class="box-label">Required data</div><div class="box-content"><ul>
+      <li>PersonalRecord (value, unit, recorded_at)</li>
+      <li>Previous PersonalRecord (value)</li>
+      <li>Exercise (name, primaryMuscle, equipment)</li>
+      <li>PR history for this exercise: last 5 records</li>
+    </ul></div></div>
+    <div class="box"><div class="box-label">Layout measurements</div><div class="box-content"><ul>
+      <li>Hero PR value: <code>prDisplayLarge</code> 64pt</li>
+      <li>Exercise name: <code>prHeadlineLarge</code> 22pt <code>prTextSecondary</code></li>
+      <li>Date badge: gold gradient pill · 12pt bold</li>
+      <li>Chart height: 80pt · 5 bars · gap 8pt</li>
+      <li>Current bar: gold gradient + <code>accentGlow</code> shadow</li>
+      <li>Past bars: <code>prBrand 40%</code></li>
+    </ul></div></div>
+  </div>
+  <div class="box"><div class="box-label">Chart implementation</div><div class="box-content">
+    Use SwiftUI Charts (iOS 16+). Bar chart, 5 most recent PRs for this exercise.<br>
+    Current PR bar: <code>LinearGradient(prCelebrationStart→prCelebrationEnd, vertical)</code> · shadow <code>accentGlow</code><br>
+    Past bars: <code>prBrand.opacity(0.40)</code> · no shadow<br>
+    Y-axis: hidden (values shown above each bar as caption) · X-axis: month abbreviation labels
+  </div></div>
+</div>
+
+<!-- ── 09 ExerciseDetailScreen ────────────────────────────────────── -->
+<div class="screen" id="s09">
+  <div class="screen-header">
+    <div class="screen-num">09</div>
+    <div><div class="screen-title">ExerciseDetailScreen</div><div class="screen-route">/exercises/detail/{exercise_id}</div></div>
+  </div>
+  <div style="margin-bottom:10px;"><span class="tag blue">Exercise library</span><span class="tag gold">4 artboard states</span></div>
+  <div class="grid">
+    <div class="box"><div class="box-label">Required data</div><div class="box-content"><ul>
+      <li>Exercise (name, primaryMuscle, secondaryMuscles[], equipment, instructions[])</li>
+      <li>demo_url (optional — ExerciseDB video URL)</li>
+      <li>User's PR for this exercise (optional — shown if exists)</li>
+      <li>Boolean: isActiveWorkoutInProgress (controls CTA)</li>
+    </ul></div></div>
+    <div class="box"><div class="box-label">Video player states</div><div class="box-content"><ul>
+      <li><strong>Loading</strong> — placeholder with shimmer</li>
+      <li><strong>Playing</strong> — AVKit VideoPlayer, loop enabled</li>
+      <li><strong>Error / nil URL</strong> → <code>PRBodyDiagram</code> with primary muscle highlighted + "Video unavailable" notice + "View on ExerciseDB →" link</li>
+    </ul></div></div>
+  </div>
+  <div class="box" style="margin-bottom:12px;"><div class="box-label">Layout</div><div class="box-content">
+    <strong>NavBar:</strong> back → exercise library · exercise name centred · ⋯ menu right (share/report)<br>
+    <strong>Video card:</strong> height 200pt · corner radius 16pt · border <code>prBorder</code><br>
+    — Playing state: <code>VideoPlayer</code> · bottom overlay gradient with exercise name + source<br>
+    — Error state: <code>PRBodyDiagram</code> centred + legend + bottom notice bar<br>
+    <strong>Muscles section:</strong> "Muscles" label 11pt · chip row: primary in <code>prBrandSub</code> bg / secondary in <code>prBrandSub 70%</code><br>
+    <strong>Equipment:</strong> inline with muscles section · <code>prBackgroundTer</code> pill<br>
+    <strong>Instructions:</strong> numbered steps · step N circle 22×22pt · body text 13pt <code>prTextSecondary</code> · step 1 circle filled <code>prBrand</code><br>
+    <strong>Bottom bar (contextual CTA):</strong><br>
+    — Active workout: "Add to workout" <code>PRButton(.primary)</code> height 48pt<br>
+    — No active workout: "Start workout with this exercise" <code>PRButton(.primary)</code><br>
+    — Fallback link below: 12pt <code>prBrandLight</code>
+  </div></div>
+  <div class="callout blue">The "Demo" button on <strong>ActiveWorkoutScreen</strong> (06) presents this screen as a modal sheet, not a push navigation. The back button dismisses the sheet and returns to the workout.</div>
+</div>
+
+<!-- ── 10 EditSetSheet ────────────────────────────────────────────── -->
+<div class="screen" id="s10">
+  <div class="screen-header">
+    <div class="screen-num">10</div>
+    <div><div class="screen-title">EditSetSheet</div><div class="screen-route">Inline component — ActiveWorkoutScreen</div></div>
+  </div>
+  <div style="margin-bottom:10px;"><span class="tag blue">Bottom sheet</span><span class="tag warn">PR warning on open</span></div>
+  <div class="grid">
+    <div class="box"><div class="box-label">Trigger</div><div class="box-content">Long-press or swipe-left on any completed set row in the set table. Shows sheet with that set pre-filled.</div></div>
+    <div class="box"><div class="box-label">PR warning rule</div><div class="box-content">Show immediately on sheet appear if the set being edited is the user's current PR for this exercise. No delay. Uses <code>.onAppear</code>, not a save-triggered check.</div></div>
+  </div>
+  <div class="box" style="margin-bottom:12px;"><div class="box-label">Layout — bottom sheet, detent 62% screen height</div><div class="box-content">
+    <strong>Implementation:</strong> <code>.sheet(isPresented:)</code> with <code>.presentationDetents([.fraction(0.62)])</code> · <code>.presentationDragIndicator(.visible)</code> · <code>.presentationBackground(Color.prBackgroundSec)</code><br>
+    <strong>Handle:</strong> system drag indicator (not custom)<br>
+    <strong>Header:</strong> "Edit Set N" <code>prHeadlineLarge</code> · "Cancel" 14pt <code>prBrandLight</code> button right · padding 18pt<br>
+    <strong>PR warning banner:</strong> <code>prWarning 10%</code> bg · <code>prWarning 30%</code> border · warning triangle + "Editing this set will recalculate your personal record" · 13pt · shown on <code>.onAppear</code><br>
+    <strong>Inputs HStack gap 10pt:</strong><br>
+    — Weight field: <code>prBackgroundTer</code> bg · height 50pt · <code>prDataMedium</code> monospaced · focused: 1.5pt <code>prBrandLight</code> border + outer glow<br>
+    — Reps field: same<br>
+    <strong>Save button:</strong> "Save changes" <code>PRButton(.primary)</code> height 48pt · margin 16pt horizontal<br>
+    <strong>Divider:</strong> <code>prBorder</code> · margin 16pt horizontal<br>
+    <strong>Delete set:</strong> "Delete set" 15pt bold <code>prError</code> · centred · taps → confirmation alert (not another sheet)
+  </div></div>
+  <div class="callout warn">Delete set confirmation: use SwiftUI <code>.alert("Delete set?", isPresented:)</code> with destructive button "Delete" and cancel. Never use a sheet-within-a-sheet.</div>
+</div>
+
+<!-- ── 11 DeleteWorkoutDialog ─────────────────────────────────────── -->
+<div class="screen" id="s11">
+  <div class="screen-header">
+    <div class="screen-num">11</div>
+    <div><div class="screen-title">Delete Workout — Confirmation Dialog</div><div class="screen-route">Inline component — WorkoutSummaryScreen + WorkoutHistoryScreen</div></div>
+  </div>
+  <div style="margin-bottom:10px;"><span class="tag red">Destructive</span><span class="tag gray">Two surfaces</span></div>
+  <div class="grid">
+    <div class="box"><div class="box-label">Surfaces</div><div class="box-content"><ul>
+      <li><strong>WorkoutSummaryScreen</strong> — "Delete workout" option in ⋯ menu or swipe action</li>
+      <li><strong>WorkoutHistoryScreen</strong> — swipe-left on workout row → delete action</li>
+    </ul></div></div>
+    <div class="box"><div class="box-label">Post-deletion</div><div class="box-content"><ul>
+      <li>Dismiss dialog</li>
+      <li>Pop navigation to HomeScreen (if from Summary) or refresh list (if from History)</li>
+      <li>PR recalculation runs in Core Library asynchronously</li>
+    </ul></div></div>
+  </div>
+  <div class="box" style="margin-bottom:12px;"><div class="box-label">Implementation</div><div class="box-content">
+    <strong>Preferred:</strong> SwiftUI <code>.confirmationDialog()</code> — renders as system action sheet on iOS, matches platform HIG.<br>
+    <strong>Custom centered dialog (as shown in spec):</strong> only if product requires custom styling. Use ZStack overlay with <code>.background(.ultraThinMaterial)</code> scrim.
+  </div></div>
+  <pre><span class="cmt">// Option A — native (preferred)</span>
+.<span class="kw">confirmationDialog</span>(
+    <span class="str">"Delete workout?"</span>,
+    isPresented: $showDeleteConfirm,
+    titleVisibility: .visible
+) {
+    <span class="type">Button</span>(<span class="str">"Delete workout"</span>, role: .destructive) { viewModel.deleteWorkout() }
+    <span class="type">Button</span>(<span class="str">"Cancel"</span>, role: .cancel) {}
+} message: {
+    <span class="type">Text</span>(<span class="str">"This will permanently delete this workout and all its sets. Your personal records may be updated."</span>)
+}
+
+<span class="cmt">// Option B — custom (if design requires exact spec visual)</span>
+<span class="kw">if</span> showDeleteConfirm {
+    <span class="type">ZStack</span> {
+        <span class="type">Color</span>.black.opacity(<span class="num">0.58</span>).ignoresSafeArea()
+            .onTapGesture { showDeleteConfirm = <span class="kw">false</span> }
+        <span class="type">PRDeleteDialogCard</span>(
+            onDelete: { viewModel.deleteWorkout(); showDeleteConfirm = <span class="kw">false</span> },
+            onCancel: { showDeleteConfirm = <span class="kw">false</span> }
+        )
+    }
+    .transition(.opacity.animation(<span class="type">PRAnimation</span>.standard))
+}</pre>
+  <div class="callout red">
+    <strong>Never merge PRs without deletion completing successfully.</strong> The <code>deleteWorkout()</code> call must confirm backend deletion before dismissing. Show a loading state on the "Delete workout" button if the delete call takes >0.5s.
+  </div>
+</div>
+
+<!-- Footer -->
+<div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
+  <p style="color:var(--t3);font-size:12px;">PRLifts Design System v2.0 · Obsidian × Velocity Hybrid · Approved April 2026<br>
+  Source of truth: <a href="8 Screens.html">8 Screens.html</a> (design canvas) · <a href="Handoff Bundle.html">Handoff Bundle.html</a> (tokens + components)</p>
+</div>
+</main>
+</body>
+</html>
