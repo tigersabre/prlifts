@@ -54,6 +54,4 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        sa.text("DROP INDEX IF EXISTS idx_workout_set_exercise_user")
-    )
+    op.execute(sa.text("DROP INDEX IF EXISTS idx_workout_set_exercise_user"))
