@@ -307,3 +307,27 @@ Run `pytest --cov=app --cov-report=html` and open `htmlcov/index.html`
 to see exactly which lines are not covered. Add tests for uncovered paths
 before opening the PR.
 
+---
+
+## PR Recalculation Acceptance Criteria
+
+These six scenarios are the acceptance criteria for the PR recalculation story
+(Decision 87). Each must be a discrete test case in `tests/services/test_pr_detection.py`.
+The test cases are listed here so they can be referenced when the story is written.
+
+| # | Scenario | Expected outcome |
+|---|---|---|
+| 1 | Edit set weight **down** below the current PR value | PR removed for that value; PR detection re-scans all historical sets and promotes the next best as the new PR |
+| 2 | Edit set weight **up** above the current PR value | New PR created from the edited set; previous PR becomes previous_value |
+| 3 | Edit a set that is **not** the basis for any PR | No PersonalRecord changes |
+| 4 | **Delete** a set that is the current PR basis | PR recalculated from remaining history; next best set promoted to current PR |
+| 5 | **Delete** the **only** set logged for an exercise | PersonalRecord for that exercise removed entirely (no remaining history to promote) |
+| 6 | Edit set weight to exactly **equal** the current PR value | No duplicate PR created; existing PR record unchanged (idempotent) |
+
+**Test setup requirements for each scenario:**
+- Create a `user`, at least one `exercise`, one or more `workout` + `workout_exercise` + `workout_set` chains
+- For scenarios 1, 4, 5, 6: ensure a `PersonalRecord` exists referencing the target set before the operation
+- All test data created via fixtures — never rely on seed data for unit tests
+- Assert the exact state of the `personal_record` table after each operation (count, value, workout_set_id foreign key)
+- Assert that `idx_workout_set_exercise_user` is used by the recalculation query (verify via `EXPLAIN` in an integration test)
+

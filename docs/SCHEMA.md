@@ -581,14 +581,19 @@ CREATE POLICY user_self ON "user"
     USING (id = auth.uid());
 
 -- Workout: full access to own workouts only
+-- FOR ALL (default) with USING covers SELECT, INSERT, UPDATE, and DELETE.
+-- UPDATE and DELETE are explicitly required for full CRUD (Decision 86).
 CREATE POLICY workout_owner ON workout
     USING (user_id = auth.uid());
 
 -- Workout exercise: via workout ownership
+-- FOR ALL with USING covers SELECT, INSERT, UPDATE, and DELETE.
 CREATE POLICY workout_exercise_owner ON workout_exercise
     USING (workout_id IN (SELECT id FROM workout WHERE user_id = auth.uid()));
 
 -- Workout set: via workout exercise ownership
+-- FOR ALL with USING covers SELECT, INSERT, UPDATE, and DELETE.
+-- UPDATE and DELETE trigger PR recalculation (Decision 87) — RLS must permit both.
 CREATE POLICY workout_set_owner ON workout_set
     USING (workout_exercise_id IN (
         SELECT we.id FROM workout_exercise we
@@ -652,6 +657,12 @@ CREATE INDEX idx_workout_set_order
 -- PR detection query (runs on every set completion)
 CREATE INDEX idx_workout_set_pr_detection
     ON workout_set(workout_exercise_id, weight, reps);
+
+-- Cross-workout PR recalculation (runs on every set edit or delete — Decision 87)
+-- Covers the full historical scan: all sets for a given exercise across all workouts
+-- for a user. Without this index the recalculation is a full scan of workout_set.
+CREATE INDEX idx_workout_set_exercise_user
+    ON workout_set(workout_exercise_id);
 
 -- Job polling by user
 CREATE INDEX idx_job_user_status

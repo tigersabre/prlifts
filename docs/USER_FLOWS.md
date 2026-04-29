@@ -179,6 +179,19 @@ ActiveWorkoutScreen
   → Workout continues
 ```
 
+**PR recalculation on set edit or delete (Decision 87):**
+PR detection also runs when an existing set is edited or deleted. The engine
+scans ALL historical sets for the exercise across ALL workouts for the user —
+not just the edited workout. Six scenarios must be covered in acceptance criteria
+(see TEST_ENV_SETUP.md — PR Recalculation Acceptance Criteria):
+
+1. Edit set weight down → PR removed → correct new PR promoted from remaining history
+2. Edit set weight up → new PR created from the edited set
+3. Edit set that is not a PR → no PR change
+4. Delete set that is a PR → PR recalculated from remaining history, next best promoted
+5. Delete only set for an exercise → PR removed entirely (no remaining history)
+6. Edit set weight equal to existing PR → no duplicate PR created (idempotent)
+
 ---
 
 ## Flow 6 — Push Notification Handling
@@ -235,7 +248,35 @@ SettingsScreen
 
 ---
 
-## Flow 8 — Offline Sync Recovery
+## Flow 8 — Delete Workout
+
+**Trigger:** User taps "Delete workout" on WorkoutDetailScreen (or swipe-to-delete on WorkoutHistoryScreen).
+
+```
+WorkoutDetailScreen  OR  WorkoutHistoryScreen (swipe action)
+  → [Tap "Delete workout"]
+  → Confirmation alert:
+      "This will permanently delete this workout and all its sets.
+       Your personal records may be updated."
+      → [Tap "Delete"] → confirmed
+          → Workout and all child WorkoutExercises and WorkoutSets deleted (cascade)
+          → PR recalculation runs across all remaining history for affected exercises
+          → WorkoutDetailScreen dismissed → WorkoutHistoryScreen (or HomeScreen)
+      → [Tap "Cancel"] → alert dismissed, no action
+```
+
+**Key rules:**
+- Confirmation copy is exactly: "This will permanently delete this workout and
+  all its sets. Your personal records may be updated." (no variations)
+- PR recalculation is synchronous (Decision 88) — navigation waits for completion
+- If the deleted workout contained the basis for one or more PRs, those PRs are
+  updated or removed as part of the same operation before the user sees the result
+- Delete is not available on a workout that is `in_progress` — use "Discard workout"
+  instead (shown on ActiveWorkoutScreen)
+
+---
+
+## Flow 10 — Offline Sync Recovery
 
 **Trigger:** User force-quits app mid-workout. Restarts app.
 
@@ -255,7 +296,7 @@ App launch
 
 ---
 
-## Flow 9 — Reporting a Problem
+## Flow 11 — Reporting a Problem
 
 ```
 SettingsScreen OR persistent failure banner
