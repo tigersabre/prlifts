@@ -1,26 +1,25 @@
 // swift-tools-version: 6.2
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
 import PackageDescription
 
 let package = Package(
     name: "PRLiftsCore",
+    platforms: [
+        .iOS(.v17),
+        .macOS(.v14)
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(
-            name: "PRLiftsCore",
-            targets: ["PRLiftsCore"]
-        ),
+        .library(name: "PRLiftsCore", targets: ["PRLiftsCore"]),
+        .library(name: "PRLiftsCoreTestSupport", targets: ["PRLiftsCoreTestSupport"])
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
+        .target(name: "PRLiftsCore"),
         .target(
-            name: "PRLiftsCore"
+            name: "PRLiftsCoreTestSupport",
+            dependencies: ["PRLiftsCore"]
         ),
         .testTarget(
             name: "PRLiftsCoreTests",
-            dependencies: ["PRLiftsCore"]
-        ),
+            dependencies: ["PRLiftsCore", "PRLiftsCoreTestSupport"]
+        )
     ]
 )

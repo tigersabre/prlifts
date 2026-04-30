@@ -1,12 +1,3 @@
-import XCTest
-@testable import PRLiftsCore
-
-final class PRLiftsCoreTests: XCTestCase {
-    func testExample() throws {
-        // XCTest Documentation
-        // https://developer.apple.com/documentation/xctest
-
-        // Defining Test Cases and Test Methods
-        // https://developer.apple.com/documentation/xctest/defining_test_cases_and_test_methods
-    }
-}
+// Tests are organized in:
+//   Models/        — per-entity model tests + RelationshipTests
+//   Migration/     — MigrationManagerTests

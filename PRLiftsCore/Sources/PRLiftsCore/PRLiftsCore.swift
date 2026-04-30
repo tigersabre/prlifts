@@ -1,2 +1,2 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
+// PRLifts Core Library — SwiftData models and business logic.
+// Architecture placement: Core Library layer. No UIKit, no SwiftUI.
