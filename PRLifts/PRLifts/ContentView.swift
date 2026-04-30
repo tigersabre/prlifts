@@ -1,21 +1,17 @@
-//
-//  ContentView.swift
-//  PRLifts
-//
-//  Created by Sarosh Arunkumar on 4/27/26.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @State private var hasCompletedOnboarding: Bool =
+        UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        if hasCompletedOnboarding {
+            HomeScreen()
+        } else {
+            OnboardingCoordinator {
+                hasCompletedOnboarding = true
+            }
         }
-        .padding()
     }
 }
 
