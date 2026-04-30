@@ -28,6 +28,7 @@ from app.config import get_settings
 from app.logging_config import configure_logging
 from app.middleware.correlation_id import CorrelationIDMiddleware
 from app.routers.health import router as health_router
+from app.routers.jobs import router as jobs_router
 from app.routers.users import router as users_router
 from app.routers.workout_exercises import router as workout_exercises_router
 from app.routers.workout_sets import router as workout_sets_router
@@ -36,6 +37,17 @@ from app.routers.workouts import router as workouts_router
 logger = logging.getLogger(__name__)
 
 scheduler = AsyncIOScheduler()
+
+
+async def _cleanup_expired_jobs_noop() -> None:
+    """
+    Placeholder for JOB-001 cleanup_expired_jobs (docs/JOB_CATALOG.md).
+
+    Production wiring requires a database-backed JobRepository injected here.
+    When the DB implementation is added, replace this with a real call:
+        await job_repo.expire_stale(datetime.now(timezone.utc))
+    """
+    logger.debug("cleanup_expired_jobs: awaiting DB implementation")
 
 
 def _init_sentry(dsn: str, environment: str) -> None:
@@ -80,6 +92,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     configure_logging(settings.log_level)
     _init_sentry(settings.sentry_dsn, settings.environment)
 
+    scheduler.add_job(
+        _cleanup_expired_jobs_noop,
+        "interval",
+        seconds=60,
+        id="cleanup_expired_jobs",
+    )
     scheduler.start()
     logger.info(
         "Application started",
@@ -132,6 +150,7 @@ def create_app() -> FastAPI:
     app.include_router(workouts_router, prefix="/v1")
     app.include_router(workout_exercises_router, prefix="/v1")
     app.include_router(workout_sets_router, prefix="/v1")
+    app.include_router(jobs_router, prefix="/v1")
     return app
 
 

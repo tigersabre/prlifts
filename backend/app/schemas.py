@@ -13,6 +13,7 @@ See docs/STANDARDS.md § 7.5 API Error Response Standard.
 
 from datetime import date, datetime
 from enum import StrEnum
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -392,3 +393,62 @@ class UpdateWorkoutSetRequest(BaseModel):
     rpe: int | None = Field(default=None, ge=1, le=10)
     is_completed: bool | None = None
     notes: str | None = Field(default=None, max_length=2000)
+
+
+# ── Job enums ─────────────────────────────────────────────────────────────────
+
+
+class JobType(StrEnum):
+    insight = "insight"
+    future_self = "future_self"
+    benchmarking = "benchmarking"
+
+
+class JobStatus(StrEnum):
+    pending = "pending"
+    processing = "processing"
+    complete = "complete"
+    failed = "failed"
+    expired = "expired"
+
+
+# ── Job request / response models ─────────────────────────────────────────────
+
+
+class CreateJobRequest(BaseModel):
+    """
+    Request body for POST /v1/jobs. job_type must be 'insight' in V1.
+    workout_id references the completed workout to generate an insight for.
+    """
+
+    job_type: JobType
+    workout_id: UUID
+
+
+class JobCreateResponse(BaseModel):
+    """
+    Response body for POST /v1/jobs (HTTP 202 Accepted).
+    Client polls GET /v1/jobs/{job_id} with exponential backoff to retrieve result.
+    """
+
+    job_id: UUID
+
+
+class JobStatusResponse(BaseModel):
+    """
+    Response body for GET /v1/jobs/{job_id}.
+    result is populated when status is complete; error_message when failed.
+    See docs/SCHEMA.md — job table.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    job_type: str
+    status: str
+    result: dict[str, Any] | None = None
+    error_message: str | None = None
+    created_at: datetime
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    expires_at: datetime

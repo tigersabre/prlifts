@@ -31,6 +31,12 @@ class Settings:
         self.api_port: int = int(os.environ.get("API_PORT", "8000"))
         # Used to verify Supabase JWTs — never log this value.
         self.supabase_jwt_secret: str = os.environ.get("SUPABASE_JWT_SECRET", "")
+        # AI provider settings — see docs/ENV_CONFIG.md AI Provider Variables.
+        self.claude_api_key: str = os.environ.get("CLAUDE_API_KEY", "")
+        # Set true in test environment to skip real API calls.
+        self.ai_providers_mocked: bool = (
+            os.environ.get("AI_PROVIDERS_MOCKED", "false").lower() == "true"
+        )
 
 
 @lru_cache(maxsize=1)
