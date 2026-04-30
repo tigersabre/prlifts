@@ -634,5 +634,6 @@ async def test_http_exception_handler_wraps_non_dict_detail() -> None:
     assert response.status_code == 404
     import json
 
-    body = json.loads(response.body)
+    raw = response.body
+    body = json.loads(raw if isinstance(raw, (bytes, bytearray, str)) else bytes(raw))
     assert body == {"detail": "Not Found"}
