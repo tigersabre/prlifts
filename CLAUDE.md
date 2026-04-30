@@ -256,6 +256,20 @@ what you build against.
 
 ---
 
+## One-time repo setup (after cloning)
+
+Run this once to wire the tracked git hooks:
+
+```bash
+bash backend/scripts/install_hooks.sh
+```
+
+This sets `core.hooksPath = .githooks` so the pre-commit hook in `.githooks/`
+runs on every commit. The hook runs `ruff check .` and `ruff format --check .`
+and blocks the commit if either fails.
+
+---
+
 ## Development workflow — the loop
 
 Every task follows this sequence before closing the GitHub issue:
