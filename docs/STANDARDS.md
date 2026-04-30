@@ -672,6 +672,48 @@ result = db.execute(
   before going to production
 - N+1 queries are a blocking PR issue — use joins or `selectinload`
 
+### 5.6 Schema Consistency
+
+SCHEMA.md is the single source of truth for both PostgreSQL (Alembic migrations) and SwiftData models (PRLiftsCore).
+
+**Column annotations:**
+Every column in SCHEMA.md is annotated as either:
+- `[iOS]` — maps to a SwiftData property in PRLiftsCore
+- `[BE]` — backend-only, no SwiftData counterpart required or permitted
+
+**The pairing rule:**
+Any story that changes an `[iOS]` annotated column must update ALL THREE in the same PR:
+- The Alembic migration
+- The SwiftData model in PRLiftsCore
+- SCHEMA.md
+
+No partial updates permitted. A migration that changes an `[iOS]` column without a corresponding SwiftData update is a blocking PR issue.
+
+**BiometricConsent is permanently `[BE]`:**
+Creating a SwiftData model for BiometricConsent is a blocking security and legal violation — not a style preference. BiometricConsent records exist server-side only, protected by backend-write-only RLS. A client-side copy would create a path for consent record manipulation.
+
+**Naming convention:**
+PostgreSQL `snake_case` maps deterministically to SwiftData `camelCase`:
+- `workout_exercise_id` → `workoutExerciseID`
+- `is_completed` → `isCompleted`
+- `created_at` → `createdAt`
+- `rpe` → `rpe` (domain abbreviation — unchanged)
+- `id` → `id` (unchanged)
+
+Document any non-obvious mapping in a comment on the SwiftData property.
+
+**CI enforcement:**
+A schema consistency CI test runs in GitHub Actions as part of backend-ci.
+It parses SCHEMA.md annotations and validates a `SchemaMapping.swift` committed to PRLiftsCore. The 5 test cases it must verify:
+1. SwiftData model exists for every `[iOS]` annotated column
+2. SwiftData property name follows camelCase convention
+3. SwiftData property type is compatible with PostgreSQL column type
+4. No SwiftData property exists for `[BE]` annotated columns
+5. Every column in SCHEMA.md has an annotation — no unannotated columns
+
+**Backend-only column rule:**
+Backend operational columns (indexes, audit fields, cost tracking) that have no user-facing data purpose are annotated `[BE]` and require no SwiftData counterpart. Adding them to SwiftData without a documented reason is a style violation.
+
 ---
 
 ## 6. iOS Platform Standards

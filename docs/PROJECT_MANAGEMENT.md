@@ -226,6 +226,7 @@ non-negotiable — partial completion is not Done.
 - [ ] Legal prerequisites confirmed met (stories with `legal-blocked` label)
 - [ ] Prompt evaluation suite passed (stories with `ai-ml` label)
 - [ ] Data minimisation question answered in PR (stories adding new data)
+- [ ] If story changes any `[iOS]` annotated column: Alembic migration, SwiftData model, and SCHEMA.md all updated in the same PR
 
 ---
 
