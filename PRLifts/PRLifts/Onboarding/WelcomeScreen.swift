@@ -97,10 +97,8 @@ struct WelcomeScreen: View {
                 .padding(.top, PRSpacing.xLarge)
 
             Button(action: onSignIn) {
-                Text("Already have an account? ")
+                Text("Already have an account? \(Text("Sign in").foregroundColor(.prBrandLight))")
                     .foregroundColor(.prTextSecondary)
-                + Text("Sign in")
-                    .foregroundColor(.prBrandLight)
             }
             .font(.system(size: 14))
             .accessibilityLabel("Sign in to existing account")

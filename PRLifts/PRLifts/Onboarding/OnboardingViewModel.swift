@@ -22,7 +22,7 @@ final class OnboardingViewModel {
     private let authService: any AuthServiceProtocol
     private let profileService: any UserProfileServiceProtocol
 
-    init(
+    nonisolated init(
         authService: any AuthServiceProtocol = StubAuthService(),
         profileService: any UserProfileServiceProtocol = StubUserProfileService()
     ) {
