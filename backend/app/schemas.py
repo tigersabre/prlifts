@@ -15,7 +15,7 @@ from datetime import date, datetime
 from enum import StrEnum
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ErrorResponse(BaseModel):
@@ -143,3 +143,105 @@ class UpdateUserRequest(BaseModel):
     @classmethod
     def trim_and_validate_display_name(cls, v: str | None) -> str | None:
         return _validate_display_name(v)
+
+
+# ── Workout enums ─────────────────────────────────────────────────────────────
+
+
+class WorkoutStatus(StrEnum):
+    in_progress = "in_progress"
+    paused = "paused"
+    partial_completion = "partial_completion"
+    completed = "completed"
+
+
+class WorkoutType(StrEnum):
+    ad_hoc = "ad_hoc"
+    planned = "planned"
+
+
+class WorkoutFormat(StrEnum):
+    weightlifting = "weightlifting"
+    cardio = "cardio"
+    mixed = "mixed"
+    other = "other"
+
+
+class WorkoutLocation(StrEnum):
+    gym = "gym"
+    home = "home"
+    outdoor = "outdoor"
+    other = "other"
+
+
+# ── Workout request / response models ─────────────────────────────────────────
+
+
+class WorkoutResponse(BaseModel):
+    """
+    Workout returned by POST /v1/workouts, GET /v1/workouts/{id}, and
+    PATCH /v1/workouts/{id}. Mirrors the workout table schema.
+
+    server_received_at is omitted — it is backend-only and never exposed
+    to clients. See docs/SCHEMA.md — workout table.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    user_id: UUID
+    name: str | None
+    notes: str | None
+    status: WorkoutStatus
+    type: WorkoutType
+    format: WorkoutFormat
+    plan_id: UUID | None
+    started_at: datetime
+    completed_at: datetime | None
+    duration_seconds: int | None
+    location: WorkoutLocation | None
+    rating: int | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class WorkoutListResponse(BaseModel):
+    """Paginated response for GET /v1/workouts."""
+
+    data: list[WorkoutResponse]
+    total: int
+    page: int
+    per_page: int
+    has_more: bool
+
+
+class CreateWorkoutRequest(BaseModel):
+    """
+    Request body for POST /v1/workouts. type and format are required.
+
+    client_started_at allows the iOS client to provide the user-perceived
+    start time. server_received_at is always assigned server-side and governs
+    conflict resolution — it is never read from this payload.
+    """
+
+    type: WorkoutType
+    format: WorkoutFormat
+    name: str | None = Field(default=None, max_length=200)
+    location: WorkoutLocation | None = None
+    plan_id: UUID | None = None
+    client_started_at: datetime | None = None
+
+
+class UpdateWorkoutRequest(BaseModel):
+    """
+    Request body for PATCH /v1/workouts/{id}. All fields are optional.
+    Only fields present in the request body are updated (model_fields_set).
+
+    When status is set to completed the server assigns completed_at —
+    any client-provided completed_at is ignored for that transition.
+    """
+
+    name: str | None = Field(default=None, max_length=200)
+    notes: str | None = Field(default=None, max_length=5000)
+    status: WorkoutStatus | None = None
+    rating: int | None = Field(default=None, ge=1, le=5)
