@@ -379,8 +379,14 @@ class TestCreateWorkout:
 
         data = response.json()
         required = {
-            "id", "user_id", "status", "type", "format",
-            "started_at", "created_at", "updated_at",
+            "id",
+            "user_id",
+            "status",
+            "type",
+            "format",
+            "started_at",
+            "created_at",
+            "updated_at",
         }
         assert required.issubset(data.keys())
 
