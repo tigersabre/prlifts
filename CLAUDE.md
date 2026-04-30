@@ -230,6 +230,7 @@ Full details in docs/PROJECT_MANAGEMENT.md. Summary for every session:
 - Tests written and passing at 90% coverage
 - No linting violations (SwiftLint / Ruff): both `ruff check .` and `ruff format --check .` must pass in `backend/`
 - No mypy errors
+- **iOS PRs: run Cmd+B in Xcode and confirm 0 errors, 0 warnings before opening the PR. A build failure is a blocking PR issue.**
 - PR opened with clear description
 - ARCHITECTURE.md updated if any decision was made
 
@@ -265,8 +266,9 @@ bash backend/scripts/install_hooks.sh
 ```
 
 This sets `core.hooksPath = .githooks` so the pre-commit hook in `.githooks/`
-runs on every commit. The hook runs `ruff check .` and `ruff format --check .`
-and blocks the commit if either fails.
+runs on every commit. The hook runs:
+- `xcodebuild build` (iOS Simulator, iPhone 17 Pro) when any `.swift` file is staged — blocks the commit if the build fails
+- `ruff check .` and `ruff format --check .` on the backend — blocks the commit if either fails
 
 ---
 
