@@ -228,7 +228,7 @@ Full details in docs/PROJECT_MANAGEMENT.md. Summary for every session:
 **Definition of Done — every story:**
 - All acceptance criteria satisfied
 - Tests written and passing at 90% coverage
-- No linting violations (SwiftLint / Ruff)
+- No linting violations (SwiftLint / Ruff): both `ruff check .` and `ruff format --check .` must pass in `backend/`
 - No mypy errors
 - PR opened with clear description
 - ARCHITECTURE.md updated if any decision was made
