@@ -96,9 +96,16 @@ async def test_scenario_1_edit_pr_weight_down_promotes_next_best() -> None:
 
     # Establish set_a as current PR
     await pr_repo.upsert(
-        _USER, _EXERCISE, set_a_id, _MODIFIER, "heaviest_weight",
-        value=100.0, value_unit="kg", recorded_at=_NOW,
-        previous_value=None, previous_recorded_at=None,
+        _USER,
+        _EXERCISE,
+        set_a_id,
+        _MODIFIER,
+        "heaviest_weight",
+        value=100.0,
+        value_unit="kg",
+        recorded_at=_NOW,
+        previous_value=None,
+        previous_recorded_at=None,
     )
 
     # Simulate editing set_a weight down to 90 — sets now has the updated set_a
@@ -106,7 +113,9 @@ async def test_scenario_1_edit_pr_weight_down_promotes_next_best() -> None:
     sets_after = [edited_set_a, set_b]
 
     is_pr = await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=set_a_id,
         sets=sets_after,
         pr_repo=pr_repo,
@@ -132,9 +141,16 @@ async def test_scenario_2_edit_weight_up_creates_new_pr() -> None:
     set_a = _set(weight=100.0, set_id=set_a_id)
 
     await pr_repo.upsert(
-        _USER, _EXERCISE, set_a_id, _MODIFIER, "heaviest_weight",
-        value=100.0, value_unit="kg", recorded_at=_NOW,
-        previous_value=None, previous_recorded_at=None,
+        _USER,
+        _EXERCISE,
+        set_a_id,
+        _MODIFIER,
+        "heaviest_weight",
+        value=100.0,
+        value_unit="kg",
+        recorded_at=_NOW,
+        previous_value=None,
+        previous_recorded_at=None,
     )
 
     # set_b edited from 80 to 110
@@ -142,7 +158,9 @@ async def test_scenario_2_edit_weight_up_creates_new_pr() -> None:
     sets_after = [set_a, edited_set_b]
 
     is_pr = await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=set_b_id,
         sets=sets_after,
         pr_repo=pr_repo,
@@ -168,9 +186,16 @@ async def test_scenario_3_edit_non_pr_set_no_changes() -> None:
     set_a = _set(weight=100.0, set_id=set_a_id)
 
     await pr_repo.upsert(
-        _USER, _EXERCISE, set_a_id, _MODIFIER, "heaviest_weight",
-        value=100.0, value_unit="kg", recorded_at=_NOW,
-        previous_value=None, previous_recorded_at=None,
+        _USER,
+        _EXERCISE,
+        set_a_id,
+        _MODIFIER,
+        "heaviest_weight",
+        value=100.0,
+        value_unit="kg",
+        recorded_at=_NOW,
+        previous_value=None,
+        previous_recorded_at=None,
     )
 
     original_pr = await pr_repo.get_current_pr(_USER, _EXERCISE, _MODIFIER, _W)
@@ -182,7 +207,9 @@ async def test_scenario_3_edit_non_pr_set_no_changes() -> None:
     sets_after = [set_a, edited_set_b]
 
     is_pr = await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=set_b_id,
         sets=sets_after,
         pr_repo=pr_repo,
@@ -208,16 +235,25 @@ async def test_scenario_4_delete_pr_set_promotes_next_best() -> None:
     set_b = _set(weight=95.0, set_id=set_b_id)
 
     await pr_repo.upsert(
-        _USER, _EXERCISE, set_a_id, _MODIFIER, "heaviest_weight",
-        value=100.0, value_unit="kg", recorded_at=_NOW,
-        previous_value=None, previous_recorded_at=None,
+        _USER,
+        _EXERCISE,
+        set_a_id,
+        _MODIFIER,
+        "heaviest_weight",
+        value=100.0,
+        value_unit="kg",
+        recorded_at=_NOW,
+        previous_value=None,
+        previous_recorded_at=None,
     )
 
     # Delete set_a — sets_after excludes it
     sets_after = [set_b]
 
     is_pr = await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=None,
         sets=sets_after,
         pr_repo=pr_repo,
@@ -240,13 +276,22 @@ async def test_scenario_5_delete_only_set_removes_pr() -> None:
     set_a_id = uuid4()
 
     await pr_repo.upsert(
-        _USER, _EXERCISE, set_a_id, _MODIFIER, "heaviest_weight",
-        value=100.0, value_unit="kg", recorded_at=_NOW,
-        previous_value=None, previous_recorded_at=None,
+        _USER,
+        _EXERCISE,
+        set_a_id,
+        _MODIFIER,
+        "heaviest_weight",
+        value=100.0,
+        value_unit="kg",
+        recorded_at=_NOW,
+        previous_value=None,
+        previous_recorded_at=None,
     )
 
     is_pr = await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=None,
         sets=[],  # no sets remaining
         pr_repo=pr_repo,
@@ -269,9 +314,16 @@ async def test_scenario_6_edit_to_equal_pr_no_change() -> None:
     set_a = _set(weight=100.0, set_id=set_a_id)
 
     await pr_repo.upsert(
-        _USER, _EXERCISE, set_a_id, _MODIFIER, "heaviest_weight",
-        value=100.0, value_unit="kg", recorded_at=_NOW,
-        previous_value=None, previous_recorded_at=None,
+        _USER,
+        _EXERCISE,
+        set_a_id,
+        _MODIFIER,
+        "heaviest_weight",
+        value=100.0,
+        value_unit="kg",
+        recorded_at=_NOW,
+        previous_value=None,
+        previous_recorded_at=None,
     )
 
     original_pr = await pr_repo.get_current_pr(_USER, _EXERCISE, _MODIFIER, _W)
@@ -283,7 +335,9 @@ async def test_scenario_6_edit_to_equal_pr_no_change() -> None:
     sets_after = [set_a, edited_set_b]
 
     is_pr = await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=set_b_id,
         sets=sets_after,
         pr_repo=pr_repo,
@@ -309,7 +363,9 @@ async def test_pr_tracked_per_record_type_independently() -> None:
     sets = [weight_set, reps_set, both_set]
 
     is_pr = await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=weight_set.id,
         sets=sets,
         pr_repo=pr_repo,
@@ -332,7 +388,9 @@ async def test_no_pr_created_when_no_matching_metric() -> None:
     reps_only = _set(reps=10)
 
     await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=reps_only.id,
         sets=[reps_only],
         pr_repo=pr_repo,
@@ -353,7 +411,9 @@ async def test_is_pr_false_when_not_holding_any_pr() -> None:
     set_b = _set(weight=80.0)
 
     is_pr = await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=set_b.id,  # set_b is NOT the best
         sets=[set_a, set_b],
         pr_repo=pr_repo,
@@ -368,7 +428,9 @@ async def test_first_set_always_creates_pr() -> None:
     first_set = _set(weight=60.0, reps=10)
 
     is_pr = await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=first_set.id,
         sets=[first_set],
         pr_repo=pr_repo,
@@ -387,7 +449,9 @@ async def test_duration_and_distance_prs_tracked() -> None:
     s2 = _set(distance_meters=5000.0)
 
     await recalculate_prs(
-        _USER, _EXERCISE, _MODIFIER,
+        _USER,
+        _EXERCISE,
+        _MODIFIER,
         current_set_id=s1.id,
         sets=[s1, s2],
         pr_repo=pr_repo,
