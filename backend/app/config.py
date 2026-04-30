@@ -37,6 +37,12 @@ class Settings:
         self.ai_providers_mocked: bool = (
             os.environ.get("AI_PROVIDERS_MOCKED", "false").lower() == "true"
         )
+        # Redis — Upstash uses rediss:// in staging/production. Empty = fail open.
+        self.redis_url: str = os.environ.get("REDIS_URL", "")
+        # Rate limits — requests per 60-second window. See docs/ENV_CONFIG.md.
+        self.rate_limit_general: int = int(os.environ.get("RATE_LIMIT_GENERAL", "100"))
+        self.rate_limit_ai: int = int(os.environ.get("RATE_LIMIT_AI", "10"))
+        self.rate_limit_auth: int = int(os.environ.get("RATE_LIMIT_AUTH", "5"))
 
 
 @lru_cache(maxsize=1)

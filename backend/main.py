@@ -27,6 +27,7 @@ from sentry_sdk.integrations.starlette import StarletteIntegration
 from app.config import get_settings
 from app.logging_config import configure_logging
 from app.middleware.correlation_id import CorrelationIDMiddleware
+from app.middleware.rate_limit import RateLimitMiddleware
 from app.routers.health import router as health_router
 from app.routers.jobs import router as jobs_router
 from app.routers.users import router as users_router
@@ -92,6 +93,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     configure_logging(settings.log_level)
     _init_sentry(settings.sentry_dsn, settings.environment)
 
+    redis_client = None
+    if settings.redis_url:
+        from redis.asyncio import Redis
+
+        redis_client = Redis.from_url(settings.redis_url, decode_responses=True)
+    app.state.redis = redis_client
+
     scheduler.add_job(
         _cleanup_expired_jobs_noop,
         "interval",
@@ -110,6 +118,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     scheduler.shutdown()
+    if app.state.redis is not None:
+        await app.state.redis.aclose()
     logger.info("Application stopped")
 
 
@@ -143,6 +153,10 @@ def create_app() -> FastAPI:
         title="PRLifts API",
         lifespan=lifespan,
     )
+    # Middleware registration order: last-added runs first (outermost).
+    # CorrelationIDMiddleware must run before RateLimitMiddleware so that
+    # request.state.correlation_id is populated for the 429 error body.
+    app.add_middleware(RateLimitMiddleware)
     app.add_middleware(CorrelationIDMiddleware)
     app.add_exception_handler(HTTPException, _http_exception_handler)  # type: ignore[arg-type]
     app.include_router(health_router)
