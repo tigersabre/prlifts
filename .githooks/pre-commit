@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# pre-commit: run ruff check and ruff format --check on the backend package.
+# Blocks the commit if either fails so CI ruff violations are caught locally.
+
+set -euo pipefail
+
+BACKEND_DIR="$(git rev-parse --show-toplevel)/backend"
+
+if [ ! -d "$BACKEND_DIR" ]; then
+  exit 0
+fi
+
+cd "$BACKEND_DIR"
+
+# Prefer the project venv; fall back to whatever ruff is on PATH.
+RUFF="ruff"
+if [ -f ".venv/bin/ruff" ]; then
+  RUFF=".venv/bin/ruff"
+fi
+
+echo "--- pre-commit: ruff check ---"
+"$RUFF" check .
+
+echo "--- pre-commit: ruff format --check ---"
+"$RUFF" format --check .

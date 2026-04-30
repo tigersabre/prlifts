@@ -228,7 +228,7 @@ Full details in docs/PROJECT_MANAGEMENT.md. Summary for every session:
 **Definition of Done — every story:**
 - All acceptance criteria satisfied
 - Tests written and passing at 90% coverage
-- No linting violations (SwiftLint / Ruff)
+- No linting violations (SwiftLint / Ruff): both `ruff check .` and `ruff format --check .` must pass in `backend/`
 - No mypy errors
 - PR opened with clear description
 - ARCHITECTURE.md updated if any decision was made
@@ -253,6 +253,20 @@ what you build against.
 - `legal-blocked` — do not start, prerequisite must be resolved first
 - `design-required` — do not start iOS UI work without approved spec
 - `ai-ml` — prompt evaluation suite must pass before activation
+
+---
+
+## One-time repo setup (after cloning)
+
+Run this once to wire the tracked git hooks:
+
+```bash
+bash backend/scripts/install_hooks.sh
+```
+
+This sets `core.hooksPath = .githooks` so the pre-commit hook in `.githooks/`
+runs on every commit. The hook runs `ruff check .` and `ruff format --check .`
+and blocks the commit if either fails.
 
 ---
 

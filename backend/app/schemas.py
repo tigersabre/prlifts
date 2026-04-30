@@ -15,7 +15,7 @@ from datetime import date, datetime
 from enum import StrEnum
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class ErrorResponse(BaseModel):
@@ -245,3 +245,150 @@ class UpdateWorkoutRequest(BaseModel):
     notes: str | None = Field(default=None, max_length=5000)
     status: WorkoutStatus | None = None
     rating: int | None = Field(default=None, ge=1, le=5)
+
+
+# ── WorkoutExercise / WorkoutSet enums ────────────────────────────────────────
+
+
+class SetType(StrEnum):
+    normal = "normal"
+    warmup = "warmup"
+    dropset = "dropset"
+    failure = "failure"
+    pr = "pr"
+
+
+class WeightModifier(StrEnum):
+    none = "none"
+    assisted = "assisted"
+    weighted = "weighted"
+
+
+# ── WorkoutExercise schemas ───────────────────────────────────────────────────
+
+
+class WorkoutExerciseResponse(BaseModel):
+    """
+    WorkoutExercise returned by POST /v1/workout-exercises.
+    Mirrors workout_exercise table. See docs/SCHEMA.md — workout_exercise table.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    workout_id: UUID
+    exercise_id: UUID
+    order_index: int
+    notes: str | None
+    rest_seconds: int | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class CreateWorkoutExerciseRequest(BaseModel):
+    """
+    Request body for POST /v1/workout-exercises.
+    workout_id ownership is verified against the JWT sub before creation.
+    """
+
+    workout_id: UUID
+    exercise_id: UUID
+    order_index: int = Field(ge=0)
+    notes: str | None = Field(default=None, max_length=2000)
+    rest_seconds: int | None = Field(default=None, ge=0, le=3600)
+
+
+# ── WorkoutSet schemas ────────────────────────────────────────────────────────
+
+
+class WorkoutSetResponse(BaseModel):
+    """
+    WorkoutSet returned by POST, PATCH /v1/workout-sets.
+    is_personal_record is computed after PR detection — not stored.
+    See docs/SCHEMA.md — workout_set table.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    workout_exercise_id: UUID
+    set_number: int
+    set_type: SetType
+    weight: float | None = None
+    weight_unit: WeightUnit | None = None
+    weight_modifier: WeightModifier
+    modifier_value: float | None = None
+    modifier_unit: WeightUnit | None = None
+    reps: int | None = None
+    duration_seconds: int | None = None
+    distance_meters: float | None = None
+    calories: int | None = None
+    rpe: int | None = None
+    is_completed: bool
+    notes: str | None = None
+    is_personal_record: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+
+class CreateWorkoutSetRequest(BaseModel):
+    """
+    Request body for POST /v1/workout-sets.
+    At least one of weight, reps, duration_seconds, or distance_meters must be set
+    (mirrors the must_have_metric DB constraint).
+    client_created_at is context only — server_received_at governs conflict resolution.
+    """
+
+    workout_exercise_id: UUID
+    set_number: int = Field(ge=1, le=100)
+    set_type: SetType = SetType.normal
+    weight: float | None = Field(default=None, ge=0, le=2000)
+    weight_unit: WeightUnit | None = None
+    weight_modifier: WeightModifier = WeightModifier.none
+    modifier_value: float | None = Field(default=None, ge=0, le=500)
+    modifier_unit: WeightUnit | None = None
+    reps: int | None = Field(default=None, ge=0, le=1000)
+    duration_seconds: int | None = Field(default=None, ge=0, le=86400)
+    distance_meters: float | None = Field(default=None, ge=0, le=100000)
+    calories: int | None = Field(default=None, ge=0, le=10000)
+    rpe: int | None = Field(default=None, ge=1, le=10)
+    is_completed: bool = False
+    notes: str | None = Field(default=None, max_length=2000)
+    client_created_at: datetime | None = None
+
+    @model_validator(mode="after")
+    def must_have_metric(self) -> "CreateWorkoutSetRequest":
+        if all(
+            v is None
+            for v in [
+                self.weight,
+                self.reps,
+                self.duration_seconds,
+                self.distance_meters,
+            ]
+        ):
+            raise ValueError(
+                "At least one of weight, reps, duration_seconds, "
+                "or distance_meters must be set."
+            )
+        return self
+
+
+class UpdateWorkoutSetRequest(BaseModel):
+    """
+    Request body for PATCH /v1/workout-sets/{id}. All fields are optional.
+    Only fields present in the request body are updated (model_fields_set).
+    """
+
+    weight: float | None = Field(default=None, ge=0, le=2000)
+    weight_unit: WeightUnit | None = None
+    weight_modifier: WeightModifier | None = None
+    modifier_value: float | None = Field(default=None, ge=0, le=500)
+    modifier_unit: WeightUnit | None = None
+    reps: int | None = Field(default=None, ge=0, le=1000)
+    duration_seconds: int | None = Field(default=None, ge=0, le=86400)
+    distance_meters: float | None = Field(default=None, ge=0, le=100000)
+    calories: int | None = Field(default=None, ge=0, le=10000)
+    rpe: int | None = Field(default=None, ge=1, le=10)
+    is_completed: bool | None = None
+    notes: str | None = Field(default=None, max_length=2000)
