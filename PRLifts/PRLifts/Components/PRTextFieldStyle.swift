@@ -12,15 +12,21 @@ struct PRInputFieldStyle: ViewModifier {
             .clipShape(RoundedRectangle(cornerRadius: PRRadius.medium))
             .overlay(
                 RoundedRectangle(cornerRadius: PRRadius.medium)
-                    .stroke(
-                        isFocused ? Color.prBrandLight : Color.prBorder,
-                        lineWidth: isFocused ? 2 : 1
-                    )
+                    .stroke(borderColor, lineWidth: borderWidth)
             )
-            .shadow(
-                color: isFocused ? Color.prBrand.opacity(0.15) : .clear,
-                radius: 8, x: 0, y: 0
-            )
+            .shadow(color: shadowColor, radius: 8, x: 0, y: 0)
+    }
+
+    private var borderColor: Color {
+        isFocused ? Color.prBrandLight : Color.prBorder
+    }
+
+    private var borderWidth: CGFloat {
+        isFocused ? 2 : 1
+    }
+
+    private var shadowColor: Color {
+        isFocused ? Color.prBrand.opacity(0.15) : .clear
     }
 }
 
