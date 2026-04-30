@@ -194,6 +194,25 @@ components:
         updated_at:
           $ref: '#/components/schemas/Timestamp'
 
+    CreateUserRequest:
+      type: object
+      description: |
+        Creates the app-level user profile. user_id is taken from the JWT sub —
+        never from the request body. display_name is trimmed before storage.
+      properties:
+        display_name:
+          type: string
+          maxLength: 50
+          nullable: true
+          description: Trimmed before storage. Max 50 characters after whitespace trimming.
+        unit_preference:
+          $ref: '#/components/schemas/WeightUnit'
+          default: lbs
+        measurement_unit:
+          type: string
+          enum: [cm, inches]
+          default: cm
+
     UpdateUserRequest:
       type: object
       properties:
@@ -756,6 +775,47 @@ security:
 paths:
 
   # ── User ────────────────────────────────────────────────────────────────────
+
+  /users:
+    post:
+      tags: [users]
+      summary: Create user profile
+      operationId: createUser
+      description: |
+        Creates the app-level User record after Supabase Auth has created the
+        auth identity. user_id is always taken from the JWT sub — never from
+        the request body. Returns HTTP 409 if a profile already exists.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User profile created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Profile already exists for this user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Validation error (e.g. display_name too long)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /users/me:
     get:

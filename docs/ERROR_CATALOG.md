@@ -130,6 +130,7 @@ a diagnostic prompt and trigger the SupportReport flow.
 | Error code | HTTP status | User-facing message | Notes |
 |---|---|---|---|
 | `user_not_found` | 404 | "User not found." | Internal — should not reach user |
+| `user_profile_exists` | 409 | "A profile already exists for this account." | POST /v1/users called when profile already exists |
 | `user_display_name_too_long` | 422 | "Display name must be 50 characters or fewer." | Validation |
 | `user_goal_invalid` | 422 | "Please select a valid goal." | Invalid enum value |
 
