@@ -33,6 +33,8 @@ protocol AuthServiceProtocol: Sendable {
 // Stub used until [INFRA] Configure Sign in with Apple capability is complete.
 // Replace with real Supabase Auth implementation when that PR merges.
 final class StubAuthService: AuthServiceProtocol {
+    nonisolated init() {}
+
     func signInWithApple() async throws -> AuthResult {
         try await Task.sleep(nanoseconds: 500_000_000)
         return AuthResult(userId: UUID().uuidString, displayName: nil, email: nil)

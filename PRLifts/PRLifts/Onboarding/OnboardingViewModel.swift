@@ -6,8 +6,8 @@ import PRLiftsCore
 final class OnboardingViewModel {
     var email: String = ""
     var displayName: String = ""
-    var selectedWeightUnit: WeightUnit
-    var selectedMeasurementUnit: MeasurementUnit
+    var selectedWeightUnit: WeightUnit = Locale.current.measurementSystem == .metric ? .kg : .lbs
+    var selectedMeasurementUnit: MeasurementUnit = Locale.current.measurementSystem == .metric ? .cm : .inches
     var isLoading: Bool = false
     var errorMessage: String?
 
@@ -28,9 +28,6 @@ final class OnboardingViewModel {
     ) {
         self.authService = authService
         self.profileService = profileService
-        let isMetric = Locale.current.measurementSystem == .metric
-        self.selectedWeightUnit = isMetric ? .kg : .lbs
-        self.selectedMeasurementUnit = isMetric ? .cm : .inches
     }
 
     func prefillDisplayName(from authResult: AuthResult) {

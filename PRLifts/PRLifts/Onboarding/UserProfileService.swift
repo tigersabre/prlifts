@@ -23,6 +23,8 @@ protocol UserProfileServiceProtocol: Sendable {
 
 // Stub until backend POST /v1/users endpoint is wired in.
 final class StubUserProfileService: UserProfileServiceProtocol {
+    nonisolated init() {}
+
     func createProfile(
         displayName: String,
         weightUnit: WeightUnit,
