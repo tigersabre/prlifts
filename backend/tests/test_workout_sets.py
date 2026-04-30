@@ -191,7 +191,7 @@ class FakeWorkoutSetRepository:
             workout_exercise_id=record.workout_exercise_id,
             user_id=record.user_id,
             exercise_id=record.exercise_id,
-            set_number=int(updates.get("set_number", record.set_number)),  # type: ignore[arg-type]
+            set_number=int(updates.get("set_number", record.set_number)),  # type: ignore[call-overload]
             set_type=str(updates.get("set_type", record.set_type)),
             weight=updates.get("weight", record.weight),  # type: ignore[arg-type]
             weight_unit=updates.get("weight_unit", record.weight_unit),  # type: ignore[arg-type]
