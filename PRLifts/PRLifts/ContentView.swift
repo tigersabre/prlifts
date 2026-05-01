@@ -6,7 +6,7 @@ struct ContentView: View {
 
     var body: some View {
         if hasCompletedOnboarding {
-            HomeScreen()
+            MainTabView()
         } else {
             OnboardingCoordinator {
                 hasCompletedOnboarding = true
