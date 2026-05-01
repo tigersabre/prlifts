@@ -158,7 +158,7 @@ final class OnboardingUITests: XCTestCase {
     private func navigateToDisplayName() {
         app.buttons["Get started"].tap()
         let emailField = app.textFields["Email address"]
-        guard emailField.waitForExistence(timeout: 3) else { return }
+        XCTAssertTrue(emailField.waitForExistence(timeout: 5))
         emailField.tap()
         emailField.typeText("test@example.com")
         app.buttons["Continue"].tap()
@@ -167,7 +167,7 @@ final class OnboardingUITests: XCTestCase {
     private func navigateToUnitPreference() {
         navigateToDisplayName()
         let field = app.textFields["Display name, 0 of 50 characters"]
-        guard field.waitForExistence(timeout: 5) else { return }
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
         field.typeText("Sarosh")
         app.buttons["Continue"].tap()
