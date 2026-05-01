@@ -171,8 +171,10 @@ private struct UnitCard: View {
                 radius: 8, x: 0, y: 0
             )
         }
+        .contentShape(Rectangle())
         .animation(PRAnimation.quick, value: isSelected)
         .accessibilityLabel("\(label), \(sublabel)")
+        .accessibilityIdentifier("\(label), \(sublabel)")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
