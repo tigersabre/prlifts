@@ -1,31 +1,36 @@
 #!/usr/bin/env bash
-# pre-commit: run Swift build check (if .swift files staged) and ruff checks.
-# Blocks the commit if any check fails so issues are caught before Xcode Cloud.
+# pre-commit: run iOS tests on iPhone SE simulator (if .swift files staged)
+# and ruff checks. Blocks the commit if any check fails so layout, touch
+# target, and concurrency issues are caught before Xcode Cloud.
+#
+# iPhone SE (3rd generation) UDID: 6C107B89-D600-4A9E-81BA-3606168CD8A3
+# Use this simulator for local test runs — it is the minimum supported
+# screen size and catches layout regressions that wider devices miss.
 
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-# --- Swift build check ---
+# --- iOS test run ---
 
 STAGED_SWIFT=$(git diff --cached --name-only --diff-filter=ACM | grep '\.swift$' || true)
 
 if [ -n "$STAGED_SWIFT" ]; then
-  echo "--- pre-commit: xcodebuild (Swift files staged) ---"
-  xcodebuild build \
+  echo "--- pre-commit: xcodebuild test (iPhone SE, Swift files staged) ---"
+  xcodebuild test \
     -project "$REPO_ROOT/PRLifts/PRLifts.xcodeproj" \
     -scheme PRLifts \
-    -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+    -destination 'platform=iOS Simulator,id=6C107B89-D600-4A9E-81BA-3606168CD8A3' \
     -quiet 2>&1
-  BUILD_STATUS=$?
-  if [ $BUILD_STATUS -ne 0 ]; then
+  TEST_STATUS=$?
+  if [ $TEST_STATUS -ne 0 ]; then
     echo ""
-    echo "error: Xcode build failed — commit blocked."
-    echo "Fix the build errors above, then commit again."
-    echo "Tip: Cmd+B in Xcode shows the same errors in the Issue Navigator."
+    echo "error: Tests failed on iPhone SE simulator — commit blocked."
+    echo "Fix the failing tests above, then commit again."
+    echo "Tip: Product → Test (⌘U) in Xcode runs the same suite."
     exit 1
   fi
-  echo "Xcode build succeeded."
+  echo "Xcode tests passed."
 fi
 
 # --- Python / backend checks ---

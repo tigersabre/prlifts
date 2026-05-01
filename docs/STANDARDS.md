@@ -843,6 +843,8 @@ Button(action: logSet) {
 - Minimum touch target 44×44pt on all interactive elements
 - VoiceOver reading order is logical — use `.accessibilitySortPriority` where needed
 - Accessibility tests run in CI via `XCTOSSignpostMetric` accessibility audit
+- UI tests must be run against iPhone SE (3rd generation) simulator before opening any iOS PR. The SE's 320pt width is the minimum supported screen size. Touch targets must meet 44×44pt minimum on all screen sizes.
+- Never use `guard element.waitForExistence() else { return }` in UI tests — use `XCTAssertTrue(element.waitForExistence(timeout:))` so failures are loud and immediate.
 
 ### 6.6 NWPathMonitor Thread Safety
 

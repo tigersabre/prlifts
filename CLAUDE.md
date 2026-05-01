@@ -230,7 +230,7 @@ Full details in docs/PROJECT_MANAGEMENT.md. Summary for every session:
 - Tests written and passing at 90% coverage
 - No linting violations (SwiftLint / Ruff): both `ruff check .` and `ruff format --check .` must pass in `backend/`
 - No mypy errors
-- **iOS PRs: run Cmd+B in Xcode and confirm 0 errors, 0 warnings before opening the PR. A build failure is a blocking PR issue.**
+- **iOS PRs: run Cmd+B in Xcode and confirm 0 errors, 0 warnings before opening the PR. A build failure is a blocking PR issue. Run UI tests on the iPhone SE (3rd generation) simulator before pushing — UDID `6C107B89-D600-4A9E-81BA-3606168CD8A3`. It is the minimum supported screen size and catches layout and touch target regressions that wider devices miss.**
 - PR opened with clear description
 - ARCHITECTURE.md updated if any decision was made
 
