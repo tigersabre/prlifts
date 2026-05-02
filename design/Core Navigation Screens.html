@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRLifts — Core Navigation Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="screens/screens-shared.jsx"></script>
+<script type="text/babel" src="screens/screens-nav.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #06070F; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+function W({ Screen, t, ...props }) {
+  return <Phone t={t}><Screen t={t} {...props} /></Phone>;
+}
+
+function App() {
+  return (
+    <DesignCanvas
+      title="PRLifts — Core Navigation Screens"
+      subtitle="Hybrid v2.0 · History · Exercise Library · Profile · Both modes · Click any artboard to fullscreen"
+    >
+      {/* ── History — empty state ── */}
+      <DCSection id="history-empty" title="01 HistoryScreen — Empty state"
+        subtitle="Barbell illustration · 'No workouts yet' · Log your first workout CTA · /workout/history">
+        <DCArtboard id="hist-empty-dk" label="Dark mode"  width={390} height={844}><W Screen={HistoryScreen} t={DK} empty={true}/></DCArtboard>
+        <DCArtboard id="hist-empty-lt" label="Light mode" width={390} height={844}><W Screen={HistoryScreen} t={LT} empty={true}/></DCArtboard>
+      </DCSection>
+
+      {/* ── History — populated ── */}
+      <DCSection id="history-full" title="02 HistoryScreen — Populated"
+        subtitle="6 workout cards · Gold PR badges · Date + duration + exercise count · Chevron tap target · /workout/history">
+        <DCArtboard id="hist-full-dk" label="Dark mode"  width={390} height={844}><W Screen={HistoryScreen} t={DK} empty={false}/></DCArtboard>
+        <DCArtboard id="hist-full-lt" label="Light mode" width={390} height={844}><W Screen={HistoryScreen} t={LT} empty={false}/></DCArtboard>
+      </DCSection>
+
+      {/* ── Exercise Library ── */}
+      <DCSection id="exercises" title="03 ExerciseLibraryScreen"
+        subtitle="Search bar · 7 muscle-group filter chips (All selected) · 11 exercises with muscle colour dots + equipment + PR badge · /exercises">
+        <DCArtboard id="ex-dk" label="Dark mode"  width={390} height={844}><W Screen={ExerciseLibraryScreen} t={DK}/></DCArtboard>
+        <DCArtboard id="ex-lt" label="Light mode" width={390} height={844}><W Screen={ExerciseLibraryScreen} t={LT}/></DCArtboard>
+      </DCSection>
+
+      {/* ── Profile ── */}
+      <DCSection id="profile" title="04 ProfileScreen"
+        subtitle="Avatar + edit badge · Stats row (workouts / PRs / streak) · Preferences + Account sections · Delete account (red) · Version · /profile">
+        <DCArtboard id="prof-dk" label="Dark mode"  width={390} height={844}><W Screen={ProfileScreen} t={DK}/></DCArtboard>
+        <DCArtboard id="prof-lt" label="Light mode" width={390} height={844}><W Screen={ProfileScreen} t={LT}/></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
