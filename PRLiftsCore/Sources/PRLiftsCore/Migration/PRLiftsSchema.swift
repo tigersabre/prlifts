@@ -11,7 +11,8 @@ public enum PRLiftsSchema {
             WorkoutSet.self,
             PersonalRecord.self,
             Job.self,
-            SyncEventLog.self
+            SyncEventLog.self,
+            SupportReport.self
         ]
     }
 
