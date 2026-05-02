@@ -227,6 +227,7 @@ non-negotiable — partial completion is not Done.
 - [ ] Prompt evaluation suite passed (stories with `ai-ml` label)
 - [ ] Data minimisation question answered in PR (stories adding new data)
 - [ ] If story changes any `[iOS]` annotated column: Alembic migration, SwiftData model, and SCHEMA.md all updated in the same PR
+- [ ] **iOS PRs:** UI tests must pass locally on iPhone SE via the pre-commit hook before opening the PR. `git commit --no-verify` is never permitted without explicit justification documented in the PR description.
 
 ---
 

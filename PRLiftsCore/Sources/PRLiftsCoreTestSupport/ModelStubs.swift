@@ -164,6 +164,26 @@ public extension SyncEventLog {
     }
 }
 
+public extension SupportReport {
+    static func stub(
+        id: UUID = UUID(),
+        deviceModel: String = "iPhone SE (3rd generation)",
+        iosVersion: String = "18.0",
+        appVersion: String = "1.0.0",
+        reportDescription: String = "App crashed on workout screen",
+        syncLogUploaded: Bool = false
+    ) -> SupportReport {
+        SupportReport(
+            id: id,
+            deviceModel: deviceModel,
+            iosVersion: iosVersion,
+            appVersion: appVersion,
+            reportDescription: reportDescription,
+            syncLogUploaded: syncLogUploaded
+        )
+    }
+}
+
 public enum TestContainerFactory {
     public static func make() throws -> ModelContainer {
         let schema = Schema(PRLiftsSchema.models)

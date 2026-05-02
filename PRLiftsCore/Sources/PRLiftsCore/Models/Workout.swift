@@ -9,6 +9,8 @@ public final class Workout {
     public var status: WorkoutStatus
     public var type: WorkoutType
     public var format: WorkoutFormat
+    // V2: will reference WorkoutPlan when the plan model is introduced.
+    public var planID: UUID?
     public var startedAt: Date
     public var completedAt: Date?
     public var durationSeconds: Int?
@@ -30,6 +32,7 @@ public final class Workout {
         status: WorkoutStatus = .inProgress,
         type: WorkoutType,
         format: WorkoutFormat,
+        planID: UUID? = nil,
         startedAt: Date = Date(),
         completedAt: Date? = nil,
         durationSeconds: Int? = nil,
@@ -45,6 +48,7 @@ public final class Workout {
         self.status = status
         self.type = type
         self.format = format
+        self.planID = planID
         self.startedAt = startedAt
         self.completedAt = completedAt
         self.durationSeconds = durationSeconds

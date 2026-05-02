@@ -267,8 +267,10 @@ bash backend/scripts/install_hooks.sh
 
 This sets `core.hooksPath = .githooks` so the pre-commit hook in `.githooks/`
 runs on every commit. The hook runs:
-- `xcodebuild build` (iOS Simulator, iPhone 17 Pro) when any `.swift` file is staged — blocks the commit if the build fails
+- `xcodebuild test` (PRLifts scheme, iPhone SE simulator) when any `.swift` file is staged — runs PRLiftsTests + PRLiftsUITests and blocks the commit if any test fails
 - `ruff check .` and `ruff format --check .` on the backend — blocks the commit if either fails
+
+**Never use `git commit --no-verify`.** The pre-commit hook is mandatory. If the hook fails, fix the underlying issue — do not bypass it. UI tests are excluded from the Xcode Cloud PR CI gate (see ARCHITECTURE.md Decision 91); the pre-commit hook is the only hard gate on UI tests before a PR is opened.
 
 ---
 
