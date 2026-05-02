@@ -1,0 +1,43 @@
+{
+  "configurations" : [
+    {
+      "id" : "80C7CE3E-2B2A-4D82-AA84-7C197B4ABADC",
+      "name" : "Configuration 1",
+      "options" : {
+        "targetForVariableExpansion" : {
+          "containerPath" : "container:PRLifts.xcodeproj",
+          "identifier" : "A47327842FA066AD009B2BC7",
+          "name" : "PRLifts"
+        }
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:PRLifts.xcodeproj",
+          "identifier" : "A47327842FA066AD009B2BC7",
+          "name" : "PRLifts"
+        }
+      ]
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:PRLifts.xcodeproj",
+        "identifier" : "A473278E2FA066AE009B2BC7",
+        "name" : "PRLiftsTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:PRLifts.xcodeproj",
+        "identifier" : "A47327982FA066AE009B2BC7",
+        "name" : "PRLiftsUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
