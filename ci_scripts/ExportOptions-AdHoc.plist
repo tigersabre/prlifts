@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Uses non-deprecated method values per Apple's 2025 deprecation notice.         -->
+<!-- "app-store" → "app-store-connect"  "ad-hoc" → "release-testing"               -->
+<!-- "development" → "debugging"                                                    -->
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>release-testing</string>
+	<key>teamID</key>
+	<string>5R3A23MRJW</string>
+	<key>compileBitcode</key>
+	<false/>
+</dict>
+</plist>

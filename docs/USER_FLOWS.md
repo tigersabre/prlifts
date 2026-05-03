@@ -81,6 +81,9 @@ HomeScreen
 - Sync icon shows pending count
 - On reconnect: silent background sync, banner disappears
 
+**HomeScreen consistency metric:**
+- Consistency metric resets every Monday. No streak count is shown. Best Week is a lifetime personal record.
+
 ---
 
 ## Flow 3 — Phase 2 Onboarding (Post-First-Workout)
