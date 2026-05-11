@@ -55,3 +55,12 @@ echo "--- pre-commit: ruff check ---"
 
 echo "--- pre-commit: ruff format --check ---"
 "$RUFF" format --check .
+
+# Prefer the project venv; fall back to whatever pip-audit is on PATH.
+PIP_AUDIT="pip-audit"
+if [ -f ".venv/bin/pip-audit" ]; then
+  PIP_AUDIT=".venv/bin/pip-audit"
+fi
+
+echo "--- pre-commit: pip-audit ---"
+"$PIP_AUDIT"
