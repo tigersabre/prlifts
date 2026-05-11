@@ -207,12 +207,10 @@ class WorkoutResponse(BaseModel):
 
 
 class WorkoutListResponse(BaseModel):
-    """Paginated response for GET /v1/workouts."""
+    """Cursor-paginated response for GET /v1/workouts (ARCHITECTURE.md Decision 94)."""
 
     data: list[WorkoutResponse]
-    total: int
-    page: int
-    per_page: int
+    next_cursor: str | None
     has_more: bool
 
 

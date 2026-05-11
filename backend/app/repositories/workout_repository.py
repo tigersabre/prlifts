@@ -61,11 +61,18 @@ class WorkoutRepository(Protocol):
     async def list_for_user(
         self,
         user_id: UUID,
-        page: int,
-        per_page: int,
+        limit: int,
+        cursor_created_at: datetime | None,
+        cursor_id: UUID | None,
         format_filter: str | None,
         status_filter: str | None,
-    ) -> tuple[list[WorkoutRecord], int]: ...
+    ) -> tuple[list[WorkoutRecord], bool]:
+        """
+        Return up to `limit` workouts ordered by (created_at DESC, id DESC),
+        starting after the cursor position. The bool indicates whether more
+        records exist beyond the returned page.
+        """
+        ...
 
     async def update(
         self,

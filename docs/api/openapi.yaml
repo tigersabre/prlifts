@@ -769,6 +769,28 @@ components:
         has_more:
           type: boolean
 
+    CursorPaginatedWorkoutResponse:
+      type: object
+      description: >
+        Cursor-based paginated response for GET /v1/workouts.
+        See ARCHITECTURE.md Decision 94. Pass next_cursor as the cursor
+        query parameter to retrieve the next page.
+      required: [data, has_more]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Workout'
+        next_cursor:
+          type: string
+          nullable: true
+          description: >
+            Opaque base64-encoded cursor for the next page.
+            Null when has_more is false.
+        has_more:
+          type: boolean
+          description: True when additional records exist beyond this page.
+
 security:
   - BearerAuth: []
 
@@ -909,18 +931,28 @@ paths:
       tags: [workouts]
       summary: List workouts for current user
       operationId: listWorkouts
+      description: >
+        Returns workouts ordered by created_at DESC, id DESC.
+        Uses cursor-based (keyset) pagination — see ARCHITECTURE.md Decision 94.
+        Pass next_cursor from the previous response as the cursor parameter to
+        retrieve the next page. Filters are applied before cursor positioning;
+        pass the same filter values on every page of a paginated sequence.
       parameters:
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: per_page
+        - name: limit
           in: query
           schema:
             type: integer
             default: 20
+            minimum: 1
             maximum: 100
+          description: Maximum number of workouts to return. Must be 1–100.
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: >
+            Opaque pagination cursor from a previous response's next_cursor field.
+            Omit to start from the first page.
         - name: format
           in: query
           schema:
@@ -931,17 +963,17 @@ paths:
             $ref: '#/components/schemas/WorkoutStatus'
       responses:
         '200':
-          description: Paginated workout list
+          description: Cursor-paginated workout list
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/PaginatedResponse'
-                  - properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Workout'
+                $ref: '#/components/schemas/CursorPaginatedWorkoutResponse'
+        '400':
+          description: Invalid cursor or limit out of range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     post:
       tags: [workouts]
