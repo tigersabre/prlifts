@@ -1,0 +1,47 @@
+# PR Code Review — Advisory
+#
+# Posts a structured AI review comment on every pull request.
+# Advisory only — do NOT add this job to branch protection required checks.
+# A review failure or poor review result never blocks a PR from merging.
+#
+# Secrets required:
+#   ANTHROPIC_API_KEY — Anthropic API key (claude-sonnet-4-6)
+#   GITHUB_TOKEN      — provided automatically by Actions
+
+name: PR Code Review (Advisory)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ai-review:
+    name: AI Code Review (advisory)
+    runs-on: ubuntu-latest
+    # continue-on-error ensures a script crash registers as a neutral check,
+    # not a blocking failure, if this job is ever accidentally added to required checks.
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Anthropic SDK
+        run: pip install "anthropic>=0.40.0"
+
+      - name: Run AI review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: python .github/scripts/pr_review.py
