@@ -136,20 +136,28 @@ class FakeWorkoutRepository:
     async def list_for_user(
         self,
         user_id: UUID,
-        page: int,
-        per_page: int,
+        limit: int,
+        cursor_created_at: datetime | None,
+        cursor_id: UUID | None,
         format_filter: str | None,
         status_filter: str | None,
-    ) -> tuple[list[WorkoutRecord], int]:
+    ) -> tuple[list[WorkoutRecord], bool]:
         records = [r for r in self._store.values() if r.user_id == user_id]
         if format_filter is not None:
             records = [r for r in records if r.format == format_filter]
         if status_filter is not None:
             records = [r for r in records if r.status == status_filter]
-        records.sort(key=lambda r: r.started_at, reverse=True)
-        total = len(records)
-        start = (page - 1) * per_page
-        return records[start : start + per_page], total
+        # Stable sort: (created_at DESC, id DESC) — matches the cursor composite.
+        records.sort(key=lambda r: (r.created_at, r.id), reverse=True)
+        if cursor_created_at is not None and cursor_id is not None:
+            records = [
+                r
+                for r in records
+                if (r.created_at, r.id) < (cursor_created_at, cursor_id)
+            ]
+        fetched = records[: limit + 1]
+        has_more = len(fetched) > limit
+        return fetched[:limit], has_more
 
     async def update(
         self,
@@ -403,7 +411,7 @@ class TestListWorkouts:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["total"] == 1
+        assert len(data["data"]) == 1
         assert data["data"][0]["id"] == str(_WORKOUT_ID)
 
     def test_does_not_return_other_users_workouts(self) -> None:
@@ -431,10 +439,9 @@ class TestListWorkouts:
         response = client.get("/v1/workouts", headers=_auth(_USER_A_ID))
 
         assert response.status_code == 200
-        assert response.json()["total"] == 0
         assert response.json()["data"] == []
 
-    def test_ordered_by_started_at_desc(self) -> None:
+    def test_ordered_by_created_at_desc(self) -> None:
         repo = FakeWorkoutRepository()
         earlier = WorkoutRecord(
             id=uuid4(),
@@ -445,13 +452,13 @@ class TestListWorkouts:
             type="ad_hoc",
             format="weightlifting",
             plan_id=None,
-            started_at=datetime(2026, 4, 28, 10, 0, 0, tzinfo=UTC),
+            started_at=_STARTED_AT,
             completed_at=None,
             duration_seconds=None,
             location=None,
             rating=None,
             server_received_at=_NOW,
-            created_at=_NOW,
+            created_at=datetime(2026, 4, 28, 12, 0, 0, tzinfo=UTC),
             updated_at=_NOW,
         )
         later = WorkoutRecord(
@@ -463,13 +470,13 @@ class TestListWorkouts:
             type="ad_hoc",
             format="weightlifting",
             plan_id=None,
-            started_at=datetime(2026, 4, 29, 10, 0, 0, tzinfo=UTC),
+            started_at=_STARTED_AT,
             completed_at=None,
             duration_seconds=None,
             location=None,
             rating=None,
             server_received_at=_NOW,
-            created_at=_NOW,
+            created_at=datetime(2026, 4, 29, 12, 0, 0, tzinfo=UTC),
             updated_at=_NOW,
         )
         repo._store[earlier.id] = earlier
@@ -490,8 +497,10 @@ class TestListWorkouts:
         response = client.get("/v1/workouts", headers=_auth())
 
         assert response.status_code == 200
-        assert response.json()["total"] == 0
-        assert response.json()["data"] == []
+        body = response.json()
+        assert body["data"] == []
+        assert body["next_cursor"] is None
+        assert body["has_more"] is False
 
     def test_pagination_has_more(self) -> None:
         repo = FakeWorkoutRepository()
@@ -505,23 +514,22 @@ class TestListWorkouts:
                 type="ad_hoc",
                 format="weightlifting",
                 plan_id=None,
-                started_at=datetime(2026, 4, i + 1, 10, 0, 0, tzinfo=UTC),
+                started_at=_STARTED_AT,
                 completed_at=None,
                 duration_seconds=None,
                 location=None,
                 rating=None,
                 server_received_at=_NOW,
-                created_at=_NOW,
+                created_at=datetime(2026, 4, i + 1, 10, 0, 0, tzinfo=UTC),
                 updated_at=_NOW,
             )
             repo._store[w.id] = w
         client = _make_client(repo)
 
-        response = client.get("/v1/workouts?page=1&per_page=3", headers=_auth())
+        response = client.get("/v1/workouts?limit=3", headers=_auth())
 
         assert response.status_code == 200
         data = response.json()
-        assert data["total"] == 5
         assert len(data["data"]) == 3
         assert data["has_more"] is True
 
@@ -529,7 +537,7 @@ class TestListWorkouts:
         repo = FakeWorkoutRepository(initial=_DEFAULT_RECORD)
         client = _make_client(repo)
 
-        response = client.get("/v1/workouts?page=1&per_page=20", headers=_auth())
+        response = client.get("/v1/workouts?limit=20", headers=_auth())
 
         assert response.status_code == 200
         assert response.json()["has_more"] is False
@@ -562,7 +570,7 @@ class TestListWorkouts:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["total"] == 1
+        assert len(data["data"]) == 1
         assert data["data"][0]["format"] == "cardio"
 
     def test_status_filter(self) -> None:
@@ -572,7 +580,7 @@ class TestListWorkouts:
         response = client.get("/v1/workouts?status=completed", headers=_auth())
 
         assert response.status_code == 200
-        assert response.json()["total"] == 0
+        assert response.json()["data"] == []
 
     def test_returns_401_when_unauthenticated(self) -> None:
         repo = FakeWorkoutRepository(initial=_DEFAULT_RECORD)
@@ -583,14 +591,207 @@ class TestListWorkouts:
         assert response.status_code == 401
         assert response.json()["error_code"] == "auth_token_missing"
 
-    def test_response_includes_pagination_fields(self) -> None:
+    def test_response_includes_cursor_pagination_fields(self) -> None:
         repo = FakeWorkoutRepository(initial=_DEFAULT_RECORD)
         client = _make_client(repo)
 
         response = client.get("/v1/workouts", headers=_auth())
 
         data = response.json()
-        assert {"data", "total", "page", "per_page", "has_more"}.issubset(data.keys())
+        assert {"data", "next_cursor", "has_more"}.issubset(data.keys())
+
+
+# ── GET /v1/workouts — cursor pagination ─────────────────────────────────────
+
+
+def _make_workout_at(
+    user_id: UUID,
+    created_at: datetime,
+    record_id: UUID | None = None,
+    name: str = "Workout",
+) -> WorkoutRecord:
+    return WorkoutRecord(
+        id=record_id if record_id is not None else uuid4(),
+        user_id=user_id,
+        name=name,
+        notes=None,
+        status="completed",
+        type="ad_hoc",
+        format="weightlifting",
+        plan_id=None,
+        started_at=_STARTED_AT,
+        completed_at=None,
+        duration_seconds=None,
+        location=None,
+        rating=None,
+        server_received_at=_NOW,
+        created_at=created_at,
+        updated_at=_NOW,
+    )
+
+
+class TestListWorkoutsCursorPagination:
+    """
+    Covers the six acceptance-criteria scenarios for cursor-based pagination
+    on GET /v1/workouts (ARCHITECTURE.md Decision 94).
+    """
+
+    def test_first_page_no_cursor_returns_first_n_items(self) -> None:
+        repo = FakeWorkoutRepository()
+        for i in range(5):
+            w = _make_workout_at(
+                _USER_A_ID,
+                datetime(2026, 4, i + 1, 10, 0, 0, tzinfo=UTC),
+                name=f"W{i + 1}",
+            )
+            repo._store[w.id] = w
+        client = _make_client(repo)
+
+        response = client.get("/v1/workouts?limit=3", headers=_auth())
+
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body["data"]) == 3
+        assert body["has_more"] is True
+        assert body["next_cursor"] is not None
+        # Ordered created_at DESC — newest first
+        assert body["data"][0]["name"] == "W5"
+        assert body["data"][1]["name"] == "W4"
+        assert body["data"][2]["name"] == "W3"
+
+    def test_middle_page_cursor_returns_next_items(self) -> None:
+        repo = FakeWorkoutRepository()
+        for i in range(5):
+            w = _make_workout_at(
+                _USER_A_ID,
+                datetime(2026, 4, i + 1, 10, 0, 0, tzinfo=UTC),
+                name=f"W{i + 1}",
+            )
+            repo._store[w.id] = w
+        client = _make_client(repo)
+
+        first = client.get("/v1/workouts?limit=2", headers=_auth())
+        assert first.status_code == 200
+        cursor = first.json()["next_cursor"]
+        assert cursor is not None
+
+        response = client.get(f"/v1/workouts?limit=2&cursor={cursor}", headers=_auth())
+
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body["data"]) == 2
+        assert body["has_more"] is True
+        # After W5, W4 (first page): should get W3, W2
+        assert body["data"][0]["name"] == "W3"
+        assert body["data"][1]["name"] == "W2"
+
+    def test_last_page_has_more_false_and_no_next_cursor(self) -> None:
+        repo = FakeWorkoutRepository()
+        for i in range(3):
+            w = _make_workout_at(
+                _USER_A_ID,
+                datetime(2026, 4, i + 1, 10, 0, 0, tzinfo=UTC),
+                name=f"W{i + 1}",
+            )
+            repo._store[w.id] = w
+        client = _make_client(repo)
+
+        first = client.get("/v1/workouts?limit=2", headers=_auth())
+        cursor = first.json()["next_cursor"]
+
+        response = client.get(f"/v1/workouts?limit=2&cursor={cursor}", headers=_auth())
+
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body["data"]) == 1
+        assert body["has_more"] is False
+        assert body["next_cursor"] is None
+
+    def test_invalid_cursor_returns_400(self) -> None:
+        repo = FakeWorkoutRepository()
+        client = _make_client(repo)
+
+        response = client.get("/v1/workouts?cursor=not-valid-base64!!", headers=_auth())
+
+        assert response.status_code == 400
+        assert response.json()["error_code"] == "workout_cursor_invalid"
+
+    def test_limit_zero_returns_400(self) -> None:
+        repo = FakeWorkoutRepository()
+        client = _make_client(repo)
+
+        response = client.get("/v1/workouts?limit=0", headers=_auth())
+
+        assert response.status_code == 400
+        assert response.json()["error_code"] == "workout_limit_invalid"
+
+    def test_limit_over_100_returns_400(self) -> None:
+        repo = FakeWorkoutRepository()
+        client = _make_client(repo)
+
+        response = client.get("/v1/workouts?limit=101", headers=_auth())
+
+        assert response.status_code == 400
+        assert response.json()["error_code"] == "workout_limit_invalid"
+
+    def test_limit_1_accepted(self) -> None:
+        repo = FakeWorkoutRepository(initial=_DEFAULT_RECORD)
+        client = _make_client(repo)
+
+        response = client.get("/v1/workouts?limit=1", headers=_auth())
+
+        assert response.status_code == 200
+
+    def test_limit_100_accepted(self) -> None:
+        repo = FakeWorkoutRepository(initial=_DEFAULT_RECORD)
+        client = _make_client(repo)
+
+        response = client.get("/v1/workouts?limit=100", headers=_auth())
+
+        assert response.status_code == 200
+
+    def test_timestamp_collision_stable_ordering(self) -> None:
+        """
+        Two workouts with identical created_at must be ordered by id DESC.
+        The cursor must position correctly within the tied timestamp group
+        so no items are skipped or duplicated across pages.
+        """
+        repo = FakeWorkoutRepository()
+        collision_ts = datetime(2026, 5, 1, 10, 0, 0, tzinfo=UTC)
+        # Use deterministic UUIDs so ordering is predictable: higher int = first in DESC
+        id_high = UUID("ffffffff-ffff-ffff-ffff-ffffffffffff")
+        id_low = UUID("00000000-0000-0000-0000-000000000001")
+
+        w_high = _make_workout_at(
+            _USER_A_ID, collision_ts, record_id=id_high, name="High"
+        )
+        w_low = _make_workout_at(_USER_A_ID, collision_ts, record_id=id_low, name="Low")
+        # Third workout older, unique timestamp — acts as page-2 content
+        w_older = _make_workout_at(
+            _USER_A_ID,
+            datetime(2026, 4, 30, 10, 0, 0, tzinfo=UTC),
+            name="Older",
+        )
+        repo._store[w_high.id] = w_high
+        repo._store[w_low.id] = w_low
+        repo._store[w_older.id] = w_older
+        client = _make_client(repo)
+
+        first = client.get("/v1/workouts?limit=2", headers=_auth())
+        assert first.status_code == 200
+        first_body = first.json()
+        assert first_body["data"][0]["name"] == "High"
+        assert first_body["data"][1]["name"] == "Low"
+        assert first_body["has_more"] is True
+
+        cursor = first_body["next_cursor"]
+        second = client.get(f"/v1/workouts?limit=2&cursor={cursor}", headers=_auth())
+        assert second.status_code == 200
+        second_body = second.json()
+        # No duplicates and no gaps — only the older workout on page 2
+        assert len(second_body["data"]) == 1
+        assert second_body["data"][0]["name"] == "Older"
+        assert second_body["has_more"] is False
 
 
 # ── GET /v1/workouts/{id} ─────────────────────────────────────────────────────

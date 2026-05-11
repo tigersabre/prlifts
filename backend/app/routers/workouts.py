@@ -14,6 +14,7 @@ See docs/ERROR_CATALOG.md — workout_ error codes.
 See docs/api/openapi.yaml — /v1/workouts paths.
 """
 
+import base64
 import logging
 from datetime import UTC, datetime
 from typing import Annotated
@@ -69,6 +70,26 @@ def _raise_workout_forbidden(correlation_id: str) -> None:
             request_id=correlation_id,
         ).model_dump(),
     )
+
+
+def _encode_cursor(created_at: datetime, record_id: UUID) -> str:
+    """Encode a (created_at, id) keyset position as an opaque base64url string."""
+    raw = f"{created_at.isoformat()}|{record_id}"
+    return base64.urlsafe_b64encode(raw.encode()).decode()
+
+
+def _decode_cursor(cursor: str) -> tuple[datetime, UUID]:
+    """
+    Decode a cursor string back to (created_at, id).
+
+    Raises ValueError for any malformed input so callers can return HTTP 400.
+    """
+    try:
+        raw = base64.urlsafe_b64decode(cursor.encode()).decode()
+        ts_str, id_str = raw.split("|", 1)
+        return datetime.fromisoformat(ts_str), UUID(id_str)
+    except Exception as exc:
+        raise ValueError(f"malformed cursor: {exc}") from exc
 
 
 def _check_ownership(
@@ -129,31 +150,65 @@ async def create_workout(
     response_model=WorkoutListResponse,
     summary="List workouts for current user",
     description=(
-        "Returns all workouts for the authenticated user ordered by started_at DESC."
+        "Returns workouts ordered by created_at DESC, id DESC. "
+        "Uses cursor-based pagination (ARCHITECTURE.md Decision 94). "
+        "Pass next_cursor from the previous response to retrieve the next page."
     ),
 )
 async def list_workouts(
     request: Request,
     current_user: Annotated[AuthenticatedUser, Depends(get_current_user)],
     repo: Annotated[WorkoutRepository, Depends(get_workout_repository)],
-    page: int = Query(default=1, ge=1),
-    per_page: int = Query(default=20, ge=1, le=100),
-    format: str | None = Query(default=None),
-    status: str | None = Query(default=None),
+    limit: int = Query(default=20),
+    cursor: str | None = Query(default=None),
+    format_filter: str | None = Query(alias="format", default=None),
+    status_filter: str | None = Query(alias="status", default=None),
 ) -> WorkoutListResponse:
-    records, total = await repo.list_for_user(
+    cid = _correlation_id(request)
+
+    if limit < 1 or limit > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorResponse(
+                error_code="workout_limit_invalid",
+                message="limit must be between 1 and 100.",
+                request_id=cid,
+            ).model_dump(),
+        )
+
+    cursor_created_at: datetime | None = None
+    cursor_id: UUID | None = None
+    if cursor is not None:
+        try:
+            cursor_created_at, cursor_id = _decode_cursor(cursor)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=ErrorResponse(
+                    error_code="workout_cursor_invalid",
+                    message="The provided cursor is invalid.",
+                    request_id=cid,
+                ).model_dump(),
+            ) from exc
+
+    records, has_more = await repo.list_for_user(
         user_id=current_user.id,
-        page=page,
-        per_page=per_page,
-        format_filter=format,
-        status_filter=status,
+        limit=limit,
+        cursor_created_at=cursor_created_at,
+        cursor_id=cursor_id,
+        format_filter=format_filter,
+        status_filter=status_filter,
     )
+
+    next_cursor: str | None = None
+    if has_more and records:
+        last = records[-1]
+        next_cursor = _encode_cursor(last.created_at, last.id)
+
     return WorkoutListResponse(
         data=[_workout_record_to_response(r) for r in records],
-        total=total,
-        page=page,
-        per_page=per_page,
-        has_more=(page * per_page) < total,
+        next_cursor=next_cursor,
+        has_more=has_more,
     )
 
 
