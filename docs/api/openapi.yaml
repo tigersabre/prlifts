@@ -791,6 +791,28 @@ components:
           type: boolean
           description: True when additional records exist beyond this page.
 
+    CursorPaginatedExerciseResponse:
+      type: object
+      description: >
+        Cursor-based paginated response for GET /v1/exercises.
+        See ARCHITECTURE.md Decision 94. Pass next_cursor as the cursor
+        query parameter to retrieve the next page.
+      required: [data, has_more]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Exercise'
+        next_cursor:
+          type: string
+          nullable: true
+          description: >
+            Opaque base64-encoded cursor for the next page.
+            Null when has_more is false.
+        has_more:
+          type: boolean
+          description: True when additional records exist beyond this page.
+
 security:
   - BearerAuth: []
 
@@ -1174,30 +1196,34 @@ paths:
           in: query
           schema:
             type: boolean
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: per_page
+        - name: limit
           in: query
           schema:
             type: integer
             default: 20
+            minimum: 1
             maximum: 100
+          description: Number of results per page (1–100).
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: >
+            Opaque cursor returned by a previous response next_cursor.
+            Omit for the first page.
       responses:
         '200':
-          description: Paginated exercise list
+          description: Cursor-paginated exercise list
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/PaginatedResponse'
-                  - properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Exercise'
+                $ref: '#/components/schemas/CursorPaginatedExerciseResponse'
+        '400':
+          description: Invalid limit or cursor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     post:
       tags: [exercises]

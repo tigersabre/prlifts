@@ -246,6 +246,81 @@ class UpdateWorkoutRequest(BaseModel):
     rating: int | None = Field(default=None, ge=1, le=5)
 
 
+# ── Exercise enums ────────────────────────────────────────────────────────────
+
+
+class MuscleGroup(StrEnum):
+    upper_chest = "upper_chest"
+    mid_chest = "mid_chest"
+    lower_chest = "lower_chest"
+    upper_back = "upper_back"
+    lower_back = "lower_back"
+    shoulders = "shoulders"
+    biceps = "biceps"
+    triceps = "triceps"
+    quads = "quads"
+    hamstrings = "hamstrings"
+    calves = "calves"
+    glutes = "glutes"
+    abs = "abs"
+    obliques = "obliques"
+    full_body = "full_body"
+
+
+class ExerciseCategory(StrEnum):
+    strength = "strength"
+    cardio = "cardio"
+    flexibility = "flexibility"
+    bodyweight = "bodyweight"
+    mobility = "mobility"
+    saq = "saq"
+    rehab = "rehab"
+
+
+class ExerciseEquipment(StrEnum):
+    barbell = "barbell"
+    dumbbell = "dumbbell"
+    kettlebell = "kettlebell"
+    machine = "machine"
+    cable = "cable"
+    bodyweight = "bodyweight"
+    cardio_machine = "cardio_machine"
+    other = "other"
+
+
+# ── Exercise response models ───────────────────────────────────────────────────
+
+
+class ExerciseResponse(BaseModel):
+    """
+    Exercise returned by GET /v1/exercises and GET /v1/exercises/{id}.
+    Mirrors the exercise table. See docs/SCHEMA.md — exercise table.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    category: ExerciseCategory
+    muscle_group: MuscleGroup
+    secondary_muscle_groups: list[MuscleGroup]
+    equipment: ExerciseEquipment
+    instructions: str | None
+    demo_url: str | None
+    is_custom: bool
+    created_by: UUID | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ExerciseListResponse(BaseModel):
+    """Cursor-paginated response for GET /v1/exercises (ARCHITECTURE.md Decision 94)."""
+
+    data: list[ExerciseResponse]
+    next_cursor: str | None
+    has_more: bool
+
+
 # ── WorkoutExercise / WorkoutSet enums ────────────────────────────────────────
 
 

@@ -28,6 +28,7 @@ from app.config import get_settings
 from app.logging_config import configure_logging
 from app.middleware.correlation_id import CorrelationIDMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.routers.exercises import router as exercises_router
 from app.routers.health import router as health_router
 from app.routers.jobs import router as jobs_router
 from app.routers.users import router as users_router
@@ -164,6 +165,7 @@ def create_app() -> FastAPI:
     app.include_router(workouts_router, prefix="/v1")
     app.include_router(workout_exercises_router, prefix="/v1")
     app.include_router(workout_sets_router, prefix="/v1")
+    app.include_router(exercises_router, prefix="/v1")
     app.include_router(jobs_router, prefix="/v1")
     return app
 
