@@ -20,6 +20,7 @@ if [ -n "$STAGED_SWIFT" ]; then
   xcodebuild test \
     -project "$REPO_ROOT/PRLifts/PRLifts.xcodeproj" \
     -scheme PRLifts \
+    -testPlan PRLiftsWeeklyTests \
     -destination 'platform=iOS Simulator,id=6C107B89-D600-4A9E-81BA-3606168CD8A3' \
     -quiet 2>&1
   TEST_STATUS=$?

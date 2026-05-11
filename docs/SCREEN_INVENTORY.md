@@ -123,12 +123,16 @@ Analytics event names use snake_case prefixed with `screen_`:
 - **Route:** `/home`
 - **Analytics:** `screen_home`
 - **Required data:** User profile, most recent workout summary,
-  current streak, next scheduled workout (if plan active)
+  workouts logged this week, personal weekly average, best week (lifetime),
+  next scheduled workout (if plan active)
 - **Actions:** Start ad hoc workout (→ ActiveWorkoutScreen),
   start planned workout (→ ActiveWorkoutScreen),
   view future self (→ FutureSelfScreen),
   navigate to history, exercises, profile
 - **Notes:** Primary landing screen after onboarding and on subsequent launches.
+  Weekly Consistency card — shows workouts logged this week vs personal weekly average
+  (e.g., 3 of 4), 7-day progress bar, Best Week stat showing personal record for
+  workouts in a single week. See ARCHITECTURE.md Decision 92.
 
 ### ActiveWorkoutScreen
 - **Route:** `/workout/active`

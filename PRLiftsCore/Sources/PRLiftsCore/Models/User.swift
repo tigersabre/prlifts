@@ -29,6 +29,9 @@ public final class User {
     @Relationship(deleteRule: .cascade, inverse: \SyncEventLog.user)
     public var syncEventLogs: [SyncEventLog]
 
+    @Relationship(deleteRule: .cascade, inverse: \SupportReport.user)
+    public var supportReports: [SupportReport]
+
     public init(
         id: UUID = UUID(),
         email: String? = nil,
@@ -61,5 +64,6 @@ public final class User {
         self.personalRecords = []
         self.jobs = []
         self.syncEventLogs = []
+        self.supportReports = []
     }
 }
