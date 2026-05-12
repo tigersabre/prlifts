@@ -34,6 +34,8 @@ tags:
     description: User profile management
   - name: notifications
     description: Push notification management
+  - name: account
+    description: Account management (deletion)
   - name: support
     description: Support and debugging
   - name: sync
@@ -56,6 +58,17 @@ components:
       type: string
       format: date-time
       example: "2026-04-25T14:30:00Z"
+
+    DeleteAccountRequest:
+      type: object
+      required: [confirm]
+      properties:
+        confirm:
+          type: boolean
+          description: >
+            Must be true to proceed. Missing or false returns HTTP 400.
+            This guard prevents accidental deletion from malformed clients.
+          example: true
 
     ErrorResponse:
       type: object
@@ -904,20 +917,59 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /users/me/delete:
+  /account/delete:
     post:
-      tags: [users]
-      summary: Delete current user account
+      tags: [account]
+      summary: Delete account
       description: |
-        Initiates account deletion. User is signed out immediately.
-        All data deleted within 30 days per Privacy Policy.
-        This action is irreversible.
-      operationId: deleteCurrentUser
+        Permanently and irreversibly deletes the authenticated user's account
+        and all associated data. Requires {"confirm": true} in the request body.
+
+        Cascade order (FK-safe):
+          workout_sets → workouts → jobs → image_deletion_queue
+          → biometric_consent.user_deleted_at → user_profile → auth.users
+
+        Completes synchronously within 30 seconds.
+        Rate limited to 1 request per user per hour.
+
+        Fal.ai generated image URLs are written to image_deletion_queue for
+        manual operator cleanup (DPA not yet signed).
+        biometric_consent rows are retained for 1 year per BIPA legal hold.
+
+        See ARCHITECTURE.md Decision 95.
+      operationId: deleteAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteAccountRequest'
       responses:
         '204':
-          description: Deletion initiated
+          description: Account deleted
+        '400':
+          description: confirm missing or false
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorised
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded (1 per hour)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until the rate limit window resets
 
   /users/me/biometric-consent:
     post:

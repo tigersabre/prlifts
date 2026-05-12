@@ -498,6 +498,21 @@ class CreateJobRequest(BaseModel):
     workout_id: UUID
 
 
+# ── Account management request models ────────────────────────────────────────
+
+
+class DeleteAccountRequest(BaseModel):
+    """
+    Request body for POST /v1/account/delete.
+
+    confirm must be explicitly set to true — missing or false returns HTTP 400.
+    This two-step guard prevents accidental deletion from malformed clients.
+    See docs/ARCHITECTURE.md Decision 95.
+    """
+
+    confirm: bool = False
+
+
 class JobCreateResponse(BaseModel):
     """
     Response body for POST /v1/jobs (HTTP 202 Accepted).

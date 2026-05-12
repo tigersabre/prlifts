@@ -28,6 +28,7 @@ from app.config import get_settings
 from app.logging_config import configure_logging
 from app.middleware.correlation_id import CorrelationIDMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.routers.account import router as account_router
 from app.routers.exercises import router as exercises_router
 from app.routers.health import router as health_router
 from app.routers.jobs import router as jobs_router
@@ -136,8 +137,16 @@ async def _http_exception_handler(request: Request, exc: HTTPException) -> JSONR
     See docs/ERROR_CATALOG.md for the canonical error response format.
     """
     if isinstance(exc.detail, dict):
-        return JSONResponse(status_code=exc.status_code, content=exc.detail)
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=exc.detail,
+            headers=exc.headers,
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=exc.headers,
+    )
 
 
 def create_app() -> FastAPI:
@@ -167,6 +176,7 @@ def create_app() -> FastAPI:
     app.include_router(workout_sets_router, prefix="/v1")
     app.include_router(exercises_router, prefix="/v1")
     app.include_router(jobs_router, prefix="/v1")
+    app.include_router(account_router, prefix="/v1")
     return app
 
 
