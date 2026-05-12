@@ -29,8 +29,13 @@ class Settings:
         self.sentry_dsn: str = os.environ.get("SENTRY_DSN", "")
         self.api_host: str = os.environ.get("API_HOST", "0.0.0.0")
         self.api_port: int = int(os.environ.get("API_PORT", "8000"))
-        # Used to verify Supabase JWTs — never log this value.
+        # Supabase project settings — see docs/ENV_CONFIG.md.
         self.supabase_jwt_secret: str = os.environ.get("SUPABASE_JWT_SECRET", "")
+        self.supabase_url: str = os.environ.get("SUPABASE_URL", "")
+        # Service role key grants admin API access — never log or expose.
+        self.supabase_service_role_key: str = os.environ.get(
+            "SUPABASE_SERVICE_ROLE_KEY", ""
+        )
         # AI provider settings — see docs/ENV_CONFIG.md AI Provider Variables.
         self.claude_api_key: str = os.environ.get("CLAUDE_API_KEY", "")
         # Set true in test environment to skip real API calls.
