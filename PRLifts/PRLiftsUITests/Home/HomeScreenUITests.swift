@@ -67,9 +67,9 @@ final class HomeScreenUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Exercises"].waitForExistence(timeout: 3))
     }
 
-    func testHomeScreen_tabSwitch_profileShowsPlaceholder() {
+    func testHomeScreen_tabSwitch_profileShowsSettings() {
         app.tabBars.buttons["Profile"].tap()
-        XCTAssertTrue(app.staticTexts["Profile"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 3))
     }
 
     func testHomeScreen_tabSwitch_returnToHome_showsWordmark() {

@@ -1,4 +1,6 @@
 import SwiftUI
+import SwiftData
+import PRLiftsCore
 
 @main
 struct PRLiftsApp: App {
@@ -15,5 +17,11 @@ struct PRLiftsApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(
+            // swiftlint:disable:next force_try
+            try! PRLiftsSchema.makeContainer(
+                inMemory: ProcessInfo.processInfo.arguments.contains("UITesting")
+            )
+        )
     }
 }
