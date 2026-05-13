@@ -80,15 +80,15 @@ final class HomeScreenUITests: XCTestCase {
 
     // MARK: Start Workout interaction
 
-    func testHomeScreen_startWorkoutButton_showsComingSoonAlert() {
+    func testHomeScreen_startWorkoutButton_presentsWorkoutScreen() {
         app.buttons["Start Workout"].tap()
-        XCTAssertTrue(app.alerts["Coming Soon"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["FinishWorkoutButton"].waitForExistence(timeout: 3))
     }
 
-    func testHomeScreen_comingSoonAlert_dismissesOnOK() {
+    func testHomeScreen_workoutScreen_cancelWithNoSets_dismisses() {
         app.buttons["Start Workout"].tap()
-        XCTAssertTrue(app.alerts["Coming Soon"].waitForExistence(timeout: 3))
-        app.alerts["Coming Soon"].buttons["OK"].tap()
-        XCTAssertFalse(app.alerts["Coming Soon"].exists)
+        XCTAssertTrue(app.buttons["FinishWorkoutButton"].waitForExistence(timeout: 3))
+        app.buttons["CancelWorkoutButton"].tap()
+        XCTAssertTrue(app.staticTexts["PRLifts"].waitForExistence(timeout: 3))
     }
 }

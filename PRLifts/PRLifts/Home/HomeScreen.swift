@@ -1,7 +1,8 @@
 import SwiftUI
+import PRLiftsCore
 
 struct HomeScreen: View {
-    @State private var showComingSoon = false
+    @State private var activeWorkout: Workout?
     private let streak = 0
 
     var body: some View {
@@ -21,11 +22,13 @@ struct HomeScreen: View {
                 .padding(.bottom, PRSpacing.large)
             }
         }
-        .alert("Coming Soon", isPresented: $showComingSoon) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Workout logging is coming soon.")
+        .sheet(item: $activeWorkout) { workout in
+            WorkoutScreen(workout: workout) {
+                activeWorkout = nil
+            }
+            .interactiveDismissDisabled()
         }
+        .accessibilityIdentifier("HomeScreen")
     }
 
     // MARK: Header
@@ -101,7 +104,7 @@ struct HomeScreen: View {
 
     private var startWorkoutButton: some View {
         PRButton(label: "Start Workout", icon: "plus") {
-            showComingSoon = true
+            activeWorkout = Workout(type: .adHoc, format: .weightlifting)
         }
     }
 
