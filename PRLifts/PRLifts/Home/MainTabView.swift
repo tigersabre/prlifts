@@ -21,7 +21,7 @@ struct MainTabView: View {
             ExercisesPlaceholderView()
                 .tabItem { Label("Exercises", systemImage: "list.bullet") }
                 .tag(PRTab.exercises)
-            ProfilePlaceholderView()
+            SettingsScreen()
                 .tabItem { Label("Profile", systemImage: "person.circle") }
                 .tag(PRTab.profile)
         }
