@@ -1,6 +1,7 @@
 # PRLifts Privacy Policy
 
-**Last Updated:** 2026-05-12
+**Last Updated:** 2026-05-12  
+**Canonical URL:** https://tigersabre.github.io/prlifts/privacy-policy
 
 PRLifts ("we", "us", "our") is a fitness tracking application. This policy explains
 what personal data we collect, how we use it, and what rights you have over it.
