@@ -7,7 +7,7 @@ final class WorkoutViewModel {
 
     // MARK: Phase
 
-    enum Phase { case active, finishing, synced }
+    enum Phase { case active, finishing, complete, syncFailed, synced }
 
     private(set) var phase: Phase = .active
 
@@ -27,12 +27,17 @@ final class WorkoutViewModel {
     var isShowingEmptyWorkoutAlert = false
     var isShowingCancelAlert = false
 
+    // Keyed by WorkoutSet.id — true if this set triggered a PersonalRecord
+    private(set) var prFlags: [UUID: Bool] = [:]
+
     private var timerTask: Task<Void, Never>?
+    private let syncService: any WorkoutSyncServiceProtocol
 
     // MARK: Init
 
-    init(workout: Workout) {
+    init(workout: Workout, syncService: any WorkoutSyncServiceProtocol = StubWorkoutSyncService()) {
         self.workout = workout
+        self.syncService = syncService
     }
 
     // MARK: Timer
@@ -142,9 +147,26 @@ final class WorkoutViewModel {
         workout.status = .completed
         workout.updatedAt = now
         stopTimer()
-        // V1: transition through finishing immediately (real sync queued in a later sprint)
         phase = .finishing
-        phase = .synced
+        performSync()
+    }
+
+    func retrySync() {
+        phase = .finishing
+        performSync()
+    }
+
+    private func performSync() {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let flags = try await syncService.fetchPRFlags(for: workout.id)
+                prFlags = flags
+                phase = .complete
+            } catch {
+                phase = .syncFailed
+            }
+        }
     }
 
     // MARK: Cancel / Discard
@@ -162,6 +184,4 @@ final class WorkoutViewModel {
         delete(workout)
         phase = .synced
     }
-
-
 }

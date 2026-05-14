@@ -20,6 +20,19 @@ struct WorkoutScreen: View {
     }
 
     var body: some View {
+        Group {
+            if viewModel.phase == .finishing || viewModel.phase == .complete || viewModel.phase == .syncFailed {
+                WorkoutSummaryScreen(viewModel: viewModel, onDone: onDismiss)
+            } else {
+                activeWorkoutContent
+            }
+        }
+        .onChange(of: viewModel.phase) { _, phase in
+            if phase == .synced { onDismiss() }
+        }
+    }
+
+    private var activeWorkoutContent: some View {
         ZStack(alignment: .bottom) {
             Color.prBackground.ignoresSafeArea()
 
@@ -40,9 +53,6 @@ struct WorkoutScreen: View {
             viewModel.startTimer()
         }
         .onDisappear { viewModel.stopTimer() }
-        .onChange(of: viewModel.phase) { _, phase in
-            if phase == .synced { onDismiss() }
-        }
         .sheet(isPresented: $isShowingExercisePicker) {
             ExercisePickerSheet { exercise in
                 viewModel.addExercise(exercise) { modelContext.insert($0) }
