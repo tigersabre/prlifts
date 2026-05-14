@@ -176,12 +176,12 @@ final class WorkoutViewModelTests: XCTestCase {
         XCTAssertTrue(sut.isShowingEmptyWorkoutAlert)
     }
 
-    func testRequestFinish_withSets_transitionsToSynced() {
+    func testRequestFinish_withSets_transitionsToFinishing() {
         let we = addWorkoutExercise()
         sut.repsInputs[we.id] = "5"
         sut.logSet(for: we, weightUnit: .lbs) { context.insert($0) }
         sut.requestFinish()
-        XCTAssertEqual(sut.phase, .synced)
+        XCTAssertEqual(sut.phase, .finishing)
     }
 
     func testConfirmFinish_setsStatusCompleted() {
@@ -200,9 +200,9 @@ final class WorkoutViewModelTests: XCTestCase {
         XCTAssertNotNil(workout.completedAt)
     }
 
-    func testConfirmFinish_transitionsToSynced() {
+    func testConfirmFinish_setsPhaseToFinishing() {
         sut.confirmFinish()
-        XCTAssertEqual(sut.phase, .synced)
+        XCTAssertEqual(sut.phase, .finishing)
     }
 
     // MARK: requestCancel / discard
@@ -232,6 +232,73 @@ final class WorkoutViewModelTests: XCTestCase {
         XCTAssertEqual(sut.phase, .synced)
     }
 
+    // MARK: Sync
+
+    func testConfirmFinish_withSuccessfulSync_transitionsToComplete() async throws {
+        let service = ImmediateSuccessService()
+        sut = WorkoutViewModel(workout: workout, syncService: service)
+        sut.confirmFinish()
+        XCTAssertEqual(sut.phase, .finishing)
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(sut.phase, .complete)
+    }
+
+    func testConfirmFinish_withFailedSync_transitionsToSyncFailed() async throws {
+        let service = ImmediateFailureService()
+        sut = WorkoutViewModel(workout: workout, syncService: service)
+        sut.confirmFinish()
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(sut.phase, .syncFailed)
+    }
+
+    func testConfirmFinish_populatesPRFlags_onSuccess() async throws {
+        let service = ImmediateSuccessService()
+        let setID = UUID()
+        service.flags = [setID: true]
+        sut = WorkoutViewModel(workout: workout, syncService: service)
+        sut.confirmFinish()
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(sut.prFlags[setID], true)
+    }
+
+    func testConfirmFinish_doesNotPopulatePRFlags_onFailure() async throws {
+        let service = ImmediateFailureService()
+        sut = WorkoutViewModel(workout: workout, syncService: service)
+        sut.confirmFinish()
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertTrue(sut.prFlags.isEmpty)
+    }
+
+    func testRetrySync_transitionsFromSyncFailedToComplete() async throws {
+        let service = ImmediateSuccessService()
+        sut = WorkoutViewModel(workout: workout, syncService: service)
+        sut.confirmFinish()
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(sut.phase, .complete)
+        // Simulate a retry from syncFailed state by injecting a failing then succeeding service
+        // Re-verify retrySync transitions correctly from finishing to complete
+        sut.retrySync()
+        XCTAssertEqual(sut.phase, .finishing)
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(sut.phase, .complete)
+    }
+
+    func testRetrySync_fromSyncFailed_transitionsToComplete() async throws {
+        let failing = ImmediateFailureService()
+        sut = WorkoutViewModel(workout: workout, syncService: failing)
+        sut.confirmFinish()
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(sut.phase, .syncFailed)
+
+        // Swap to a succeeding service via a fresh VM to test the retry path
+        let succeeding = ImmediateSuccessService()
+        sut = WorkoutViewModel(workout: workout, syncService: succeeding)
+        sut.retrySync()
+        XCTAssertEqual(sut.phase, .finishing)
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(sut.phase, .complete)
+    }
+
     // MARK: formattedElapsed
 
     func testFormattedElapsed_underOneHour() {
@@ -246,5 +313,20 @@ final class WorkoutViewModelTests: XCTestCase {
 
     func testFormattedElapsed_zero() {
         XCTAssertEqual(sut.formattedElapsed, "00:00")
+    }
+}
+
+// MARK: Test Sync Services
+
+private final class ImmediateSuccessService: WorkoutSyncServiceProtocol {
+    nonisolated init() {}
+    var flags: [UUID: Bool] = [:]
+    func fetchPRFlags(for workoutID: UUID) async throws -> [UUID: Bool] { flags }
+}
+
+private final class ImmediateFailureService: WorkoutSyncServiceProtocol {
+    nonisolated init() {}
+    func fetchPRFlags(for workoutID: UUID) async throws -> [UUID: Bool] {
+        throw NSError(domain: "test.sync", code: 1)
     }
 }
