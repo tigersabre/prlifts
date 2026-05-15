@@ -12,7 +12,8 @@ public enum PRLiftsSchema {
             PersonalRecord.self,
             Job.self,
             SyncEventLog.self,
-            SupportReport.self
+            SupportReport.self,
+            UserStatsCache.self,
         ]
     }
 
