@@ -16,6 +16,7 @@ public final class Workout {
     public var durationSeconds: Int?
     public var location: WorkoutLocation?
     public var rating: Int?
+    public var aiInsightText: String?
     public var serverReceivedAt: Date
     public var createdAt: Date
     public var updatedAt: Date
