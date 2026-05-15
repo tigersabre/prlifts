@@ -1,9 +1,13 @@
 import SwiftUI
+import SwiftData
 import PRLiftsCore
 
 struct WorkoutSummaryScreen: View {
     let viewModel: WorkoutViewModel
     let onDone: () -> Void
+
+    @Environment(\.modelContext) private var modelContext
+    @State private var insightViewModel = WorkoutInsightViewModel()
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -15,6 +19,9 @@ struct WorkoutSummaryScreen: View {
                     statsGrid
                     prStatusSection
                     exerciseList
+                    if insightViewModel.phase != .idle {
+                        aiInsightCard
+                    }
                 }
                 .padding(.horizontal, PRSpacing.screenHorizontal)
                 .padding(.top, PRSpacing.medium)
@@ -22,6 +29,17 @@ struct WorkoutSummaryScreen: View {
             }
 
             doneButton
+        }
+        .onChange(of: viewModel.phase) { _, newPhase in
+            if newPhase == .complete {
+                insightViewModel.trigger(
+                    workoutID: viewModel.workout.id,
+                    cachedInsight: viewModel.workout.aiInsightText
+                ) { [self] text in
+                    viewModel.workout.aiInsightText = text
+                    try? modelContext.save()
+                }
+            }
         }
     }
 
@@ -210,6 +228,88 @@ struct WorkoutSummaryScreen: View {
         var label = "Set \(set.setNumber): \(weightDisplay(set)), \(repsDisplay(set)) reps"
         if isPR { label += ", personal record" }
         return label
+    }
+
+    // MARK: AI Insight Card
+
+    private var aiInsightCard: some View {
+        PRCard {
+            VStack(alignment: .leading, spacing: PRSpacing.xSmall) {
+                insightCardHeader
+                insightCardBody
+            }
+        }
+    }
+
+    private var insightCardHeader: some View {
+        HStack(spacing: PRSpacing.xxSmall) {
+            Image(systemName: "brain.head.profile")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.prBrandLight)
+                .accessibilityHidden(true)
+            Text("AI INSIGHT")
+                .font(.prCaptionSmall.weight(.bold))
+                .tracking(0.5)
+                .foregroundColor(.prBrandLight)
+                .accessibilityIdentifier("InsightCardHeader")
+        }
+    }
+
+    @ViewBuilder
+    private var insightCardBody: some View {
+        switch insightViewModel.phase {
+        case .idle:
+            EmptyView()
+
+        case .requesting, .polling:
+            HStack(spacing: PRSpacing.xSmall) {
+                ProgressView()
+                    .tint(.prBrand)
+                    .accessibilityHidden(true)
+                Text("Generating your insight\u{2026}")
+                    .font(.prBody)
+                    .foregroundColor(.prTextSecondary)
+                    .accessibilityIdentifier("InsightLoadingText")
+            }
+
+        case .complete(let text):
+            Text(text)
+                .font(.prBody)
+                .foregroundColor(.prTextPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("InsightText")
+
+        case .timeout:
+            VStack(alignment: .leading, spacing: PRSpacing.xxSmall) {
+                Text("Check back later")
+                    .font(.prBody)
+                    .foregroundColor(.prTextSecondary)
+                    .accessibilityIdentifier("InsightTimeoutText")
+                Button("Retry") {
+                    insightViewModel.retry(
+                        workoutID: viewModel.workout.id
+                    ) { [self] text in
+                        viewModel.workout.aiInsightText = text
+                        try? modelContext.save()
+                    }
+                }
+                .font(.prCaption.weight(.medium))
+                .foregroundColor(.prBrandLight)
+                .accessibilityIdentifier("InsightRetryButton")
+            }
+
+        case .rateLimited:
+            Text("Come back later for your insight")
+                .font(.prBody)
+                .foregroundColor(.prTextSecondary)
+                .accessibilityIdentifier("InsightRateLimitedText")
+
+        case .offline:
+            Text("No connection — will retry automatically")
+                .font(.prBody)
+                .foregroundColor(.prTextSecondary)
+                .accessibilityIdentifier("InsightOfflineText")
+        }
     }
 
     // MARK: Done Button
