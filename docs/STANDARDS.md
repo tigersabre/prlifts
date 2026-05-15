@@ -714,6 +714,33 @@ It parses SCHEMA.md annotations and validates a `SchemaMapping.swift` committed 
 **Backend-only column rule:**
 Backend operational columns (indexes, audit fields, cost tracking) that have no user-facing data purpose are annotated `[BE]` and require no SwiftData counterpart. Adding them to SwiftData without a documented reason is a style violation.
 
+### 5.7 Manual Verification Artifact Requirement
+
+Any story whose Definition of Done includes a manual verification step must produce a named written artifact committed to `docs/` as a required DoD output.
+
+**The rule:**
+"Tested manually" without a committed document is not a passing DoD. The artifact must:
+- Have a filename that identifies the feature and the verification date (e.g., `docs/verification/p2-05-manual-verification-2026-05-15.md`)
+- State what was tested, the exact steps taken, the environment, and the observed result
+- Be committed in the same PR as the feature — not retroactively
+
+**Why:**
+Manual verification that exists only in a developer's memory provides no audit trail, cannot be reproduced by reviewers, and cannot be checked during incident investigation. A committed document turns a subjective "I tested it" into a reviewable, traceable record that survives team turnover.
+
+**What qualifies as a manual verification step:**
+- UI interactions or visual layout checks not covered by XCUITest
+- End-to-end flows in a staging environment
+- Third-party integration verification (Supabase, Fal.ai, APNs)
+- Performance or load checks not automated in CI
+- Any DoD criterion that contains the word "verify", "confirm", "check", or "validate" without a linked automated test
+
+**What does not require an artifact:**
+- Steps fully covered by passing automated tests (unit, integration, or UI)
+- Steps covered by CI output (build logs, coverage reports)
+
+**CI enforcement:**
+This standard is enforced by PR review checklist, not automated CI. Reviewers must reject PRs where a manual DoD step is claimed but no `docs/verification/` artifact is present.
+
 ---
 
 ## 6. iOS Platform Standards
