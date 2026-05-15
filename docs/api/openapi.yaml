@@ -826,6 +826,40 @@ components:
           type: boolean
           description: True when additional records exist beyond this page.
 
+    StatsResponse:
+      type: object
+      description: >
+        Aggregated workout and PR statistics for the authenticated user.
+        All fields are non-negative integers. New users with no history
+        receive all zeros — never null, never 404.
+        weekly_count reflects the current Mon–Sun UTC window (Decision 92).
+      required: [weekly_count, best_week, total_workouts, total_prs]
+      properties:
+        weekly_count:
+          type: integer
+          minimum: 0
+          description: >
+            Completed workouts in the current Mon–Sun UTC window.
+            Resets to 0 each Monday at 00:00 UTC.
+          example: 3
+        best_week:
+          type: integer
+          minimum: 0
+          description: >
+            Highest completed-workout count in any Mon–Sun UTC window, all time.
+            Never decreases. Equals weekly_count when the current week is the best.
+          example: 5
+        total_workouts:
+          type: integer
+          minimum: 0
+          description: Lifetime completed workouts for the user.
+          example: 42
+        total_prs:
+          type: integer
+          minimum: 0
+          description: Lifetime personal records set by the user.
+          example: 7
+
 security:
   - BearerAuth: []
 
@@ -1505,4 +1539,30 @@ paths:
       responses:
         '201':
           description: Report submitted
+
+  # ── Stats ──────────────────────────────────────────────────────────────────
+  /stats:
+    get:
+      tags: [stats]
+      summary: Get user statistics
+      operationId: getStats
+      security:
+        - BearerAuth: []
+      description: >
+        Returns aggregated workout and PR statistics for the authenticated user.
+        All fields return 0 for new users — never null, never 404.
+        weekly_count reflects the current Mon–Sun UTC window (Decision 92).
+      responses:
+        '200':
+          description: User statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 

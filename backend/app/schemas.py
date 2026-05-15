@@ -540,3 +540,24 @@ class JobStatusResponse(BaseModel):
     started_at: datetime | None = None
     completed_at: datetime | None = None
     expires_at: datetime
+
+
+class StatsResponse(BaseModel):
+    """
+    Response body for GET /v1/stats.
+
+    All fields are non-negative integers. New users with no history receive
+    all zeros — never null, never 404.
+
+    weekly_count:   completed workouts in the current Mon–Sun UTC window.
+    best_week:      highest weekly completed count across all time.
+    total_workouts: lifetime completed workouts for the user.
+    total_prs:      lifetime personal records set by the user.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    weekly_count: int
+    best_week: int
+    total_workouts: int
+    total_prs: int
