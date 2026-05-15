@@ -3,7 +3,8 @@ import PRLiftsCore
 
 struct HomeScreen: View {
     @State private var activeWorkout: Workout?
-    private let streak = 0
+    @State private var viewModel = HomeStatsViewModel()
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         ZStack {
@@ -12,7 +13,7 @@ struct HomeScreen: View {
                 VStack(spacing: 10) {
                     headerRow
                         .padding(.top, PRSpacing.xxSmall)
-                    streakCard
+                    consistencyCard
                     startWorkoutButton
                     statsGrid
                     recentPRsSection
@@ -21,6 +22,9 @@ struct HomeScreen: View {
                 .padding(.horizontal, PRSpacing.screenHorizontal)
                 .padding(.bottom, PRSpacing.large)
             }
+        }
+        .task {
+            viewModel.load(modelContext: modelContext)
         }
         .sheet(item: $activeWorkout) { workout in
             WorkoutScreen(workout: workout) {
@@ -51,37 +55,38 @@ struct HomeScreen: View {
         }
     }
 
-    // MARK: Streak Card
+    // MARK: Consistency Card — Decision 92
 
-    private var streakCard: some View {
+    private var consistencyCard: some View {
         HStack(spacing: PRSpacing.xSmall) {
             RoundedRectangle(cornerRadius: 14)
                 .fill(Color.prBrand)
                 .frame(width: 48, height: 48)
                 .overlay(
-                    Image(systemName: "flame.fill")
+                    Image(systemName: "calendar")
                         .font(.system(size: 22, weight: .semibold))
                         .foregroundColor(.white)
                 )
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: PRSpacing.xxxSmall) {
-                Text("Keep it going!")
+                Text("This week")
                     .font(.prCaption)
                     .foregroundColor(.prTextSecondary)
-                Text("\(streak)-day streak")
+                Text(viewModel.consistencyLine)
                     .font(.prHeadlineLarge)
                     .foregroundColor(.prTextPrimary)
+                    .accessibilityIdentifier("ConsistencyLine")
 
                 HStack(spacing: 4) {
                     ForEach(0..<7, id: \.self) { day in
                         RoundedRectangle(cornerRadius: 2)
-                            .fill(day < streak ? Color.prBrand : Color.prBackgroundTer)
+                            .fill(day < viewModel.filledSegments ? Color.prBrand : Color.prBackgroundTer)
                             .frame(height: 4)
                             .frame(maxWidth: .infinity)
                     }
                 }
-                .accessibilityLabel("Streak progress: \(streak) of 7 days this week")
+                .accessibilityLabel(viewModel.consistencyLine)
             }
         }
         .padding(PRSpacing.cardPadding)
@@ -98,6 +103,8 @@ struct HomeScreen: View {
                 .stroke(Color.prBrand.opacity(0.40), lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.12), radius: 4, x: 0, y: 2)
+        .redacted(reason: viewModel.isLoading ? .placeholder : [])
+        .accessibilityIdentifier("ConsistencyCard")
     }
 
     // MARK: Start Workout Button
@@ -112,8 +119,16 @@ struct HomeScreen: View {
 
     private var statsGrid: some View {
         HStack(spacing: PRSpacing.xxSmall) {
-            statCard(value: "0", label: "Workouts", valueColor: .prBrand)
-            statCard(value: "0", label: "Personal Records", valueColor: .prAccent)
+            switch viewModel.phase {
+            case .loading:
+                statCard(value: "0", label: "Workouts", valueColor: .prBrand)
+                    .redacted(reason: .placeholder)
+                statCard(value: "0", label: "Personal Records", valueColor: .prAccent)
+                    .redacted(reason: .placeholder)
+            case .loaded(let stats):
+                statCard(value: "\(stats.totalWorkouts)", label: "Workouts", valueColor: .prBrand)
+                statCard(value: "\(stats.totalPrs)", label: "Personal Records", valueColor: .prAccent)
+            }
         }
     }
 

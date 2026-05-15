@@ -34,8 +34,21 @@ final class HomeScreenUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["PRLifts"].waitForExistence(timeout: 3))
     }
 
-    func testHomeScreen_streakCard_isPresent() {
-        XCTAssertTrue(app.staticTexts["0-day streak"].waitForExistence(timeout: 3))
+    func testHomeScreen_consistencyCard_isPresent() {
+        XCTAssertTrue(app.otherElements["ConsistencyCard"].waitForExistence(timeout: 3))
+    }
+
+    func testHomeScreen_consistencyCard_showsWorkoutsThisWeekText() {
+        // Stub has 3s delay in UITesting mode; wait up to 6s for loaded state.
+        let predicate = NSPredicate(format: "label CONTAINS 'workouts this week.'")
+        let match = app.staticTexts.matching(predicate).firstMatch
+        XCTAssertTrue(match.waitForExistence(timeout: 6))
+    }
+
+    func testHomeScreen_consistencyCard_loadingSkeletonVisible() {
+        // Immediately on launch the stub hasn't resolved — ConsistencyCard is present
+        // but ConsistencyLine shows the placeholder (redacted or "— of —").
+        XCTAssertTrue(app.otherElements["ConsistencyCard"].waitForExistence(timeout: 2))
     }
 
     func testHomeScreen_startWorkoutButton_isPresent() {
