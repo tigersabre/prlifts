@@ -32,6 +32,7 @@ from app.routers.account import router as account_router
 from app.routers.exercises import router as exercises_router
 from app.routers.health import router as health_router
 from app.routers.jobs import router as jobs_router
+from app.routers.stats import router as stats_router
 from app.routers.users import router as users_router
 from app.routers.workout_exercises import router as workout_exercises_router
 from app.routers.workout_sets import router as workout_sets_router
@@ -176,6 +177,7 @@ def create_app() -> FastAPI:
     app.include_router(workout_sets_router, prefix="/v1")
     app.include_router(exercises_router, prefix="/v1")
     app.include_router(jobs_router, prefix="/v1")
+    app.include_router(stats_router, prefix="/v1")
     app.include_router(account_router, prefix="/v1")
     return app
 
