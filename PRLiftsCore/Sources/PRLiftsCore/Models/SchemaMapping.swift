@@ -66,7 +66,6 @@ public enum SchemaMapping {
         Column(table: "workout", pgColumn: "status",           pgType: "workout_status",  swiftModel: "Workout", swiftProperty: "status",          swiftType: "WorkoutStatus"),
         Column(table: "workout", pgColumn: "type",             pgType: "workout_type",    swiftModel: "Workout", swiftProperty: "type",            swiftType: "WorkoutType"),
         Column(table: "workout", pgColumn: "format",           pgType: "workout_format",  swiftModel: "Workout", swiftProperty: "format",          swiftType: "WorkoutFormat"),
-        Column(table: "workout", pgColumn: "plan_id",          pgType: "UUID",            swiftModel: "Workout", swiftProperty: "planID",          swiftType: "UUID?"),
         Column(table: "workout", pgColumn: "started_at",       pgType: "TIMESTAMPTZ",     swiftModel: "Workout", swiftProperty: "startedAt",       swiftType: "Date"),
         Column(table: "workout", pgColumn: "completed_at",     pgType: "TIMESTAMPTZ",     swiftModel: "Workout", swiftProperty: "completedAt",     swiftType: "Date?"),
         Column(table: "workout", pgColumn: "duration_seconds", pgType: "INTEGER",         swiftModel: "Workout", swiftProperty: "durationSeconds", swiftType: "Int?"),

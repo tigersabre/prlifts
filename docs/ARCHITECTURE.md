@@ -598,7 +598,6 @@ notes             string        nullable
 status            enum          in_progress | paused | partial_completion | completed
 type              enum          ad_hoc | planned
 format            enum          weightlifting | cardio | mixed | other
-plan_id           uuid          nullable — foreign key to WorkoutPlan (V2)
 started_at        timestamp
 completed_at      timestamp     nullable
 duration_seconds  integer       nullable — stored explicitly for query performance

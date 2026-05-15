@@ -331,9 +331,6 @@ components:
           $ref: '#/components/schemas/WorkoutType'
         format:
           $ref: '#/components/schemas/WorkoutFormat'
-        plan_id:
-          $ref: '#/components/schemas/UUID'
-          nullable: true
         started_at:
           $ref: '#/components/schemas/Timestamp'
         completed_at:
@@ -369,9 +366,6 @@ components:
           $ref: '#/components/schemas/WorkoutFormat'
         location:
           $ref: '#/components/schemas/WorkoutLocation'
-        plan_id:
-          $ref: '#/components/schemas/UUID'
-          nullable: true
         client_started_at:
           $ref: '#/components/schemas/Timestamp'
           description: Client-reported start time. Server assigns server_received_at for conflict resolution.

@@ -132,7 +132,6 @@ async def create_workout(
         workout_format=body.format.value,
         name=body.name,
         location=body.location.value if body.location is not None else None,
-        plan_id=body.plan_id,
         client_started_at=body.client_started_at,
     )
     logger.info(

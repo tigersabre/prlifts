@@ -196,7 +196,6 @@ class WorkoutResponse(BaseModel):
     status: WorkoutStatus
     type: WorkoutType
     format: WorkoutFormat
-    plan_id: UUID | None
     started_at: datetime
     completed_at: datetime | None
     duration_seconds: int | None
@@ -227,7 +226,6 @@ class CreateWorkoutRequest(BaseModel):
     format: WorkoutFormat
     name: str | None = Field(default=None, max_length=200)
     location: WorkoutLocation | None = None
-    plan_id: UUID | None = None
     client_started_at: datetime | None = None
 
 
