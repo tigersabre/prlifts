@@ -241,7 +241,6 @@ CREATE TABLE workout (
     status           workout_status NOT NULL DEFAULT 'in_progress',          -- [iOS]
     type             workout_type NOT NULL,                                   -- [iOS]
     format           workout_format NOT NULL,                                 -- [iOS]
-    plan_id          UUID,                               -- [iOS] V2: will reference workout_plan
     started_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),                      -- [iOS]
     completed_at     TIMESTAMPTZ,                                             -- [iOS]
     duration_seconds INTEGER,                            -- [iOS] stored for query perf (derived)

@@ -70,7 +70,6 @@ _DEFAULT_WORKOUT = WorkoutRecord(
     status="completed",
     type="ad_hoc",
     format="weightlifting",
-    plan_id=None,
     started_at=_NOW - timedelta(hours=1),
     completed_at=_NOW,
     duration_seconds=3600,

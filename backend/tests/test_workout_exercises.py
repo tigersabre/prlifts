@@ -54,7 +54,6 @@ _DEFAULT_WORKOUT = WorkoutRecord(
     status="in_progress",
     type="ad_hoc",
     format="weightlifting",
-    plan_id=None,
     started_at=_NOW,
     completed_at=None,
     duration_seconds=None,

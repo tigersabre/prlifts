@@ -26,7 +26,6 @@ class WorkoutRecord:
     status: str
     type: str
     format: str
-    plan_id: UUID | None
     started_at: datetime
     completed_at: datetime | None
     duration_seconds: int | None
@@ -52,7 +51,6 @@ class WorkoutRepository(Protocol):
         workout_format: str,
         name: str | None,
         location: str | None,
-        plan_id: UUID | None,
         client_started_at: datetime | None,
     ) -> WorkoutRecord: ...
 

@@ -1,7 +1,7 @@
 import Foundation
 
 public enum MigrationManager {
-    public static let currentVersion = 2
+    public static let currentVersion = 3
 
     nonisolated(unsafe) static var userDefaults: UserDefaults = .standard
 

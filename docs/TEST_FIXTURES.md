@@ -481,7 +481,6 @@ def make_workout(
         status=status,
         type=type,
         format=format,
-        plan_id=None,
         started_at=started_at or datetime.now(timezone.utc),
         completed_at=None,
         duration_seconds=None,
