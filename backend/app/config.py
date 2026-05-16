@@ -42,6 +42,9 @@ class Settings:
         self.ai_providers_mocked: bool = (
             os.environ.get("AI_PROVIDERS_MOCKED", "false").lower() == "true"
         )
+        # PostgreSQL — direct connection string for asyncpg pool (not Supabase REST).
+        self.database_url: str = os.environ.get("DATABASE_URL", "")
+        self.pool_max_size: int = int(os.environ.get("POOL_MAX_SIZE", "10"))
         # Redis — Upstash uses rediss:// in staging/production. Empty = fail open.
         self.redis_url: str = os.environ.get("REDIS_URL", "")
         # Rate limits — requests per 60-second window. See docs/ENV_CONFIG.md.

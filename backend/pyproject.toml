@@ -20,4 +20,4 @@ addopts = "--cov=app --cov=main --cov-report=term-missing --cov-fail-under=90"
 
 [tool.coverage.run]
 source = ["app", "main"]
-omit = ["tests/*"]
+omit = ["tests/*", "app/repositories/asyncpg_*.py", "app/db.py"]

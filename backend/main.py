@@ -15,6 +15,7 @@ Run locally:
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
 import sentry_sdk
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -25,9 +26,38 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
 
 from app.config import get_settings
+from app.db import create_pool
 from app.logging_config import configure_logging
 from app.middleware.correlation_id import CorrelationIDMiddleware
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.repositories.asyncpg_exercise_repository import AsyncpgExerciseRepository
+from app.repositories.asyncpg_job_repository import (
+    AsyncpgAIRequestLogRepository,
+    AsyncpgJobRepository,
+    AsyncpgPromptTemplateRepository,
+)
+from app.repositories.asyncpg_personal_record_repository import (
+    AsyncpgPersonalRecordRepository,
+)
+from app.repositories.asyncpg_stats_repository import AsyncpgStatsRepository
+from app.repositories.asyncpg_user_repository import AsyncpgUserRepository
+from app.repositories.asyncpg_workout_exercise_repository import (
+    AsyncpgWorkoutExerciseRepository,
+)
+from app.repositories.asyncpg_workout_repository import AsyncpgWorkoutRepository
+from app.repositories.asyncpg_workout_set_repository import AsyncpgWorkoutSetRepository
+from app.repositories.exercise_repository import get_exercise_repository
+from app.repositories.job_repository import (
+    get_ai_request_log_repository,
+    get_job_repository,
+    get_prompt_template_repository,
+)
+from app.repositories.personal_record_repository import get_personal_record_repository
+from app.repositories.stats_repository import get_stats_repository
+from app.repositories.user_repository import get_user_repository
+from app.repositories.workout_exercise_repository import get_workout_exercise_repository
+from app.repositories.workout_repository import get_workout_repository
+from app.repositories.workout_set_repository import get_workout_set_repository
 from app.routers.account import router as account_router
 from app.routers.exercises import router as exercises_router
 from app.routers.health import router as health_router
@@ -41,17 +71,6 @@ from app.routers.workouts import router as workouts_router
 logger = logging.getLogger(__name__)
 
 scheduler = AsyncIOScheduler()
-
-
-async def _cleanup_expired_jobs_noop() -> None:
-    """
-    Placeholder for JOB-001 cleanup_expired_jobs (docs/JOB_CATALOG.md).
-
-    Production wiring requires a database-backed JobRepository injected here.
-    When the DB implementation is added, replace this with a real call:
-        await job_repo.expire_stale(datetime.now(timezone.utc))
-    """
-    logger.debug("cleanup_expired_jobs: awaiting DB implementation")
 
 
 def _init_sentry(dsn: str, environment: str) -> None:
@@ -103,12 +122,55 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         redis_client = Redis.from_url(settings.redis_url, decode_responses=True)
     app.state.redis = redis_client
 
-    scheduler.add_job(
-        _cleanup_expired_jobs_noop,
-        "interval",
-        seconds=60,
-        id="cleanup_expired_jobs",
-    )
+    pool = None
+    if settings.database_url:
+        pool = await create_pool(settings.database_url, settings.pool_max_size)
+
+        app.dependency_overrides[get_user_repository] = lambda: AsyncpgUserRepository(
+            pool
+        )
+        app.dependency_overrides[get_workout_repository] = lambda: (
+            AsyncpgWorkoutRepository(pool)
+        )
+        app.dependency_overrides[get_workout_exercise_repository] = lambda: (
+            AsyncpgWorkoutExerciseRepository(pool)
+        )
+        app.dependency_overrides[get_workout_set_repository] = lambda: (
+            AsyncpgWorkoutSetRepository(pool)
+        )
+        app.dependency_overrides[get_personal_record_repository] = lambda: (
+            AsyncpgPersonalRecordRepository(pool)
+        )
+        app.dependency_overrides[get_exercise_repository] = lambda: (
+            AsyncpgExerciseRepository(pool)
+        )
+        app.dependency_overrides[get_stats_repository] = lambda: AsyncpgStatsRepository(
+            pool
+        )
+        app.dependency_overrides[get_job_repository] = lambda: AsyncpgJobRepository(
+            pool
+        )
+        app.dependency_overrides[get_prompt_template_repository] = lambda: (
+            AsyncpgPromptTemplateRepository(pool)
+        )
+        app.dependency_overrides[get_ai_request_log_repository] = lambda: (
+            AsyncpgAIRequestLogRepository(pool)
+        )
+
+        job_repo = AsyncpgJobRepository(pool)
+
+        async def _cleanup_expired_jobs() -> None:
+            count = await job_repo.expire_stale(datetime.now(UTC))
+            if count:
+                logger.info("Expired stale jobs", extra={"count": count})
+
+        scheduler.add_job(
+            _cleanup_expired_jobs,
+            "interval",
+            seconds=60,
+            id="cleanup_expired_jobs",
+        )
+
     scheduler.start()
     logger.info(
         "Application started",
@@ -121,6 +183,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     scheduler.shutdown()
+    if pool is not None:
+        await pool.close()
     if app.state.redis is not None:
         await app.state.redis.aclose()
     logger.info("Application stopped")
