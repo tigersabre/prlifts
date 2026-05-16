@@ -3,22 +3,24 @@ test_auth.py
 PRLifts Backend Tests
 
 Unit tests for app/auth.py: all four JWT validation scenarios defined in
-docs/ERROR_CATALOG.md, credential safety (JWT value never in logs), and the
-shared ErrorResponse schema.
+docs/ERROR_CATALOG.md, credential safety (JWT value never in logs), the
+shared ErrorResponse schema, and ES256/JWKS verification.
 
 get_current_user is tested by calling it directly as an async function with
 a minimal mock Request — no HTTP round-trip needed for these unit tests.
+ES256 tests patch app.auth.get_public_key to avoid network calls.
 """
 
 import logging
 import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID
 
 import jwt
 import pytest
+from cryptography.hazmat.primitives.asymmetric import ec
 from fastapi import HTTPException
 
 
@@ -333,3 +335,155 @@ def test_error_response_serialises_all_fields() -> None:
         "message": "Authentication required.",
         "request_id": "abc-123",
     }
+
+
+# ── ES256 / JWKS verification ─────────────────────────────────────────────────
+
+_EC_PRIVATE_KEY = ec.generate_private_key(ec.SECP256R1())
+_EC_PUBLIC_KEY = _EC_PRIVATE_KEY.public_key()
+_TEST_KID = "test-ec-key-id"
+
+
+def _make_es256_token(
+    *,
+    user_id: str | None = _TEST_USER_ID,
+    expired: bool = False,
+    audience: str = _AUDIENCE,
+    kid: str = _TEST_KID,
+) -> str:
+    now = datetime.now(UTC)
+    exp = now - timedelta(hours=1) if expired else now + timedelta(hours=1)
+    payload: dict[str, Any] = {"exp": exp, "aud": audience, "role": "authenticated"}
+    if user_id is not None:
+        payload["sub"] = user_id
+    return jwt.encode(
+        payload,
+        _EC_PRIVATE_KEY,
+        algorithm="ES256",
+        headers={"kid": kid},
+    )
+
+
+async def test_es256_valid_token_returns_authenticated_user() -> None:
+    from app.auth import AuthenticatedUser, get_current_user
+
+    token = _make_es256_token()
+    request = _make_request(authorization=f"Bearer {token}")
+
+    with __import__("unittest.mock", fromlist=["patch"]).patch(
+        "app.auth.get_public_key", AsyncMock(return_value=_EC_PUBLIC_KEY)
+    ):
+        user = await get_current_user(request)
+
+    assert isinstance(user, AuthenticatedUser)
+    assert user.id == UUID(_TEST_USER_ID)
+    assert user.role == "authenticated"
+
+
+async def test_es256_user_id_matches_sub_claim() -> None:
+    from app.auth import get_current_user
+
+    other_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+    token = _make_es256_token(user_id=other_id)
+    request = _make_request(authorization=f"Bearer {token}")
+
+    with __import__("unittest.mock", fromlist=["patch"]).patch(
+        "app.auth.get_public_key", AsyncMock(return_value=_EC_PUBLIC_KEY)
+    ):
+        user = await get_current_user(request)
+
+    assert user.id == UUID(other_id)
+
+
+async def test_es256_expired_token_raises_auth_token_expired() -> None:
+    from app.auth import get_current_user
+
+    token = _make_es256_token(expired=True)
+    request = _make_request(authorization=f"Bearer {token}")
+
+    with __import__("unittest.mock", fromlist=["patch"]).patch(
+        "app.auth.get_public_key", AsyncMock(return_value=_EC_PUBLIC_KEY)
+    ):
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_user(request)
+
+    assert exc_info.value.status_code == 401
+    assert _detail(exc_info.value)["error_code"] == "auth_token_expired"
+
+
+async def test_es256_unknown_kid_raises_auth_token_invalid() -> None:
+    """get_public_key returns None (kid not in JWKS after refetch) → 401."""
+    from app.auth import get_current_user
+
+    token = _make_es256_token()
+    request = _make_request(authorization=f"Bearer {token}")
+
+    with __import__("unittest.mock", fromlist=["patch"]).patch(
+        "app.auth.get_public_key", AsyncMock(return_value=None)
+    ):
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_user(request)
+
+    assert exc_info.value.status_code == 401
+    assert _detail(exc_info.value)["error_code"] == "auth_token_invalid"
+
+
+async def test_es256_missing_kid_raises_auth_token_invalid() -> None:
+    """ES256 token with no kid header → 401 without touching JWKS."""
+    from app.auth import get_current_user
+
+    # Encode without a kid header
+    now = datetime.now(UTC)
+    payload = {
+        "sub": _TEST_USER_ID,
+        "exp": now + timedelta(hours=1),
+        "aud": _AUDIENCE,
+        "role": "authenticated",
+    }
+    token = jwt.encode(payload, _EC_PRIVATE_KEY, algorithm="ES256")
+    request = _make_request(authorization=f"Bearer {token}")
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user(request)
+
+    assert exc_info.value.status_code == 401
+    assert _detail(exc_info.value)["error_code"] == "auth_token_invalid"
+
+
+async def test_es256_wrong_key_raises_auth_token_invalid() -> None:
+    """Token signed with one key but verified with a different key → 401."""
+    from app.auth import get_current_user
+
+    other_private_key = ec.generate_private_key(ec.SECP256R1())
+    other_public_key = other_private_key.public_key()
+
+    token = _make_es256_token()
+    request = _make_request(authorization=f"Bearer {token}")
+
+    with __import__("unittest.mock", fromlist=["patch"]).patch(
+        "app.auth.get_public_key", AsyncMock(return_value=other_public_key)
+    ):
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_user(request)
+
+    assert exc_info.value.status_code == 401
+    assert _detail(exc_info.value)["error_code"] == "auth_token_invalid"
+
+
+async def test_es256_never_logs_jwt_value(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    from app.auth import get_current_user
+
+    token = _make_es256_token()
+    request = _make_request(authorization=f"Bearer {token}")
+
+    with __import__("unittest.mock", fromlist=["patch"]).patch(
+        "app.auth.get_public_key", AsyncMock(return_value=_EC_PUBLIC_KEY)
+    ):
+        with caplog.at_level(logging.DEBUG):
+            await get_current_user(request)
+
+    for record in caplog.records:
+        assert token not in record.getMessage()
+        assert token not in str(record.__dict__)
