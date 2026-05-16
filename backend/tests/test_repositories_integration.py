@@ -16,9 +16,11 @@ See docs/ARCHITECTURE.md Decision 96 — direct asyncpg pool.
 """
 
 import os
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+import asyncpg
 import pytest
 
 _REAL_DB_AVAILABLE = os.environ.get("ENVIRONMENT") != "test"
@@ -36,7 +38,7 @@ _SKIP = pytest.mark.skipif(
 
 
 @pytest.fixture(scope="module")
-async def pool():
+async def pool() -> AsyncGenerator[asyncpg.Pool, None]:
     if not _REAL_DB_AVAILABLE:
         pytest.skip("No real DB available")
     from app.db import create_pool
@@ -50,7 +52,7 @@ async def pool():
 
 
 @_SKIP
-async def test_user_repo_create_get_exists_update(pool) -> None:
+async def test_user_repo_create_get_exists_update(pool: asyncpg.Pool) -> None:
     from app.repositories.asyncpg_user_repository import AsyncpgUserRepository
 
     repo = AsyncpgUserRepository(pool)
@@ -85,7 +87,7 @@ async def test_user_repo_create_get_exists_update(pool) -> None:
 
 
 @_SKIP
-async def test_workout_repo_create_list_update_delete(pool) -> None:
+async def test_workout_repo_create_list_update_delete(pool: asyncpg.Pool) -> None:
     from app.repositories.asyncpg_user_repository import AsyncpgUserRepository
     from app.repositories.asyncpg_workout_repository import AsyncpgWorkoutRepository
 
@@ -131,7 +133,7 @@ async def test_workout_repo_create_list_update_delete(pool) -> None:
 
 
 @_SKIP
-async def test_workout_exercise_repo_create_get_delete(pool) -> None:
+async def test_workout_exercise_repo_create_get_delete(pool: asyncpg.Pool) -> None:
     from app.repositories.asyncpg_user_repository import AsyncpgUserRepository
     from app.repositories.asyncpg_workout_exercise_repository import (
         AsyncpgWorkoutExerciseRepository,
@@ -180,7 +182,9 @@ async def test_workout_exercise_repo_create_get_delete(pool) -> None:
 
 
 @_SKIP
-async def test_workout_set_repo_create_get_update_list_delete(pool) -> None:
+async def test_workout_set_repo_create_get_update_list_delete(
+    pool: asyncpg.Pool,
+) -> None:
     from app.repositories.asyncpg_user_repository import AsyncpgUserRepository
     from app.repositories.asyncpg_workout_exercise_repository import (
         AsyncpgWorkoutExerciseRepository,
@@ -260,7 +264,7 @@ async def test_workout_set_repo_create_get_update_list_delete(pool) -> None:
 
 
 @_SKIP
-async def test_personal_record_repo_upsert_get_delete(pool) -> None:
+async def test_personal_record_repo_upsert_get_delete(pool: asyncpg.Pool) -> None:
     from app.repositories.asyncpg_personal_record_repository import (
         AsyncpgPersonalRecordRepository,
     )
@@ -384,7 +388,7 @@ async def test_personal_record_repo_upsert_get_delete(pool) -> None:
 
 
 @_SKIP
-async def test_exercise_repo_list_and_search(pool) -> None:
+async def test_exercise_repo_list_and_search(pool: asyncpg.Pool) -> None:
     from app.repositories.asyncpg_exercise_repository import AsyncpgExerciseRepository
 
     repo = AsyncpgExerciseRepository(pool)
@@ -404,7 +408,7 @@ async def test_exercise_repo_list_and_search(pool) -> None:
 
 
 @_SKIP
-async def test_stats_repo_returns_zeroes_for_new_user(pool) -> None:
+async def test_stats_repo_returns_zeroes_for_new_user(pool: asyncpg.Pool) -> None:
     from app.repositories.asyncpg_stats_repository import AsyncpgStatsRepository
     from app.repositories.asyncpg_user_repository import AsyncpgUserRepository
 
@@ -425,7 +429,7 @@ async def test_stats_repo_returns_zeroes_for_new_user(pool) -> None:
 
 
 @_SKIP
-async def test_job_repo_create_get_update_expire_stale(pool) -> None:
+async def test_job_repo_create_get_update_expire_stale(pool: asyncpg.Pool) -> None:
     from app.repositories.asyncpg_job_repository import AsyncpgJobRepository
     from app.repositories.asyncpg_user_repository import AsyncpgUserRepository
 
@@ -481,7 +485,7 @@ async def test_job_repo_create_get_update_expire_stale(pool) -> None:
 
 
 @_SKIP
-async def test_prompt_template_repo_get_active(pool) -> None:
+async def test_prompt_template_repo_get_active(pool: asyncpg.Pool) -> None:
     from app.repositories.asyncpg_job_repository import AsyncpgPromptTemplateRepository
 
     repo = AsyncpgPromptTemplateRepository(pool)
@@ -496,7 +500,7 @@ async def test_prompt_template_repo_get_active(pool) -> None:
 
 
 @_SKIP
-async def test_ai_request_log_repo_create(pool) -> None:
+async def test_ai_request_log_repo_create(pool: asyncpg.Pool) -> None:
     from app.repositories.asyncpg_job_repository import (
         AsyncpgAIRequestLogRepository,
         AsyncpgJobRepository,
