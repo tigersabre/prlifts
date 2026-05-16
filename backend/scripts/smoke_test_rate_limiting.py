@@ -17,7 +17,7 @@ Usage:
     export RAILWAY_URL=https://prlifts-production.up.railway.app
     export TEST_EMAIL=smoke@example.com
     export TEST_PASSWORD=your-test-password
-    python scripts/smoke_test_rate_limiting.py
+    python scripts/smoke_test_rate_limiting.py  # run from backend/
 
 All five environment variables are required. See docs/ENV_CONFIG.md for
 the canonical variable reference and the Railway dashboard for current values.
@@ -59,14 +59,6 @@ _TIMEOUT = httpx.Timeout(15.0)
 # ---------------------------------------------------------------------------
 
 
-def _env(name: str) -> str:
-    val = os.environ.get(name, "").strip()
-    if not val:
-        print(f"  MISSING: {name} is not set or empty", flush=True)
-        return ""
-    return val
-
-
 def _load_env() -> dict[str, str] | None:
     missing = False
     cfg: dict[str, str] = {}
@@ -90,7 +82,9 @@ def _print_result(label: str, passed: bool, detail: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-def authenticate(supabase_url: str, anon_key: str, email: str, password: str) -> str | None:
+def authenticate(
+    supabase_url: str, anon_key: str, email: str, password: str
+) -> str | None:
     """Returns a JWT access token or None on failure."""
     print("\n── Step 1: Supabase authentication ──", flush=True)
     url = f"{supabase_url}/auth/v1/token?grant_type=password"
@@ -137,7 +131,7 @@ def check_ai_rate_limit(railway_url: str, token: str) -> bool:
     Uses a random workout_id — the 422 / 404 responses before the rate limit
     kicks in are fine; we only care about seeing a 429.
     """
-    print(f"\n── Step 2: AI rate limit — POST /v1/jobs (limit: 10/min) ──", flush=True)
+    print("\n── Step 2: AI rate limit — POST /v1/jobs (limit: 10/min) ──", flush=True)
     url = f"{railway_url}/v1/jobs"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -157,7 +151,11 @@ def check_ai_rate_limit(railway_url: str, token: str) -> bool:
         try:
             resp = httpx.post(url, headers=headers, json=body, timeout=_TIMEOUT)
         except httpx.RequestError as exc:
-            _print_result("AI rate limit — request", False, f"request error on attempt {i}: {exc}")
+            _print_result(
+                "AI rate limit — request",
+                False,
+                f"request error on attempt {i}: {exc}",
+            )
             return False
 
         last_status = resp.status_code
@@ -173,11 +171,11 @@ def check_ai_rate_limit(railway_url: str, token: str) -> bool:
             print(f"             body: {resp.text[:120]}", flush=True)
             break
 
-    _print_result(
-        "AI 429 received",
-        hit_429,
-        f"got 429 after ≤{_AI_MAX_REQUESTS} requests" if hit_429 else f"last response was HTTP {last_status}: {last_body}",
-    )
+    if hit_429:
+        ai_detail = f"got 429 after ≤{_AI_MAX_REQUESTS} requests"
+    else:
+        ai_detail = f"last response was HTTP {last_status}: {last_body}"
+    _print_result("AI 429 received", hit_429, ai_detail)
     _print_result(
         "AI Retry-After header present",
         retry_after_present,
@@ -201,7 +199,7 @@ def check_general_rate_limit(railway_url: str, token: str) -> bool:
     after this smoke test or run against a dedicated test account.
     """
     print(
-        f"\n── Step 3: General rate limit — POST /v1/workouts (limit: 100/min) ──",
+        "\n── Step 3: General rate limit — POST /v1/workouts (limit: 100/min) ──",
         flush=True,
     )
     url = f"{railway_url}/v1/workouts"
@@ -221,14 +219,16 @@ def check_general_rate_limit(railway_url: str, token: str) -> bool:
             resp = httpx.post(url, headers=headers, json=body, timeout=_TIMEOUT)
         except httpx.RequestError as exc:
             _print_result(
-                "General rate limit — request", False, f"request error on attempt {i}: {exc}"
+                "General rate limit — request",
+                False,
+                f"request error on attempt {i}: {exc}",
             )
             return False
 
         last_status = resp.status_code
         last_body = resp.text[:120]
 
-        # Print a dot every 10 requests to show progress without flooding output
+        # Print every 10 requests to show progress without flooding output
         if i % 10 == 0 or resp.status_code == 429:
             print(f"    attempt {i:>3}: HTTP {resp.status_code}", flush=True)
 
@@ -240,13 +240,11 @@ def check_general_rate_limit(railway_url: str, token: str) -> bool:
             print(f"             body: {resp.text[:120]}", flush=True)
             break
 
-    _print_result(
-        "General 429 received",
-        hit_429,
-        f"got 429 after ≤{_GENERAL_MAX_REQUESTS} requests"
-        if hit_429
-        else f"last response was HTTP {last_status}: {last_body}",
-    )
+    if hit_429:
+        gen_detail = f"got 429 after ≤{_GENERAL_MAX_REQUESTS} requests"
+    else:
+        gen_detail = f"last response was HTTP {last_status}: {last_body}"
+    _print_result("General 429 received", hit_429, gen_detail)
     _print_result(
         "General Retry-After header present",
         retry_after_present,
@@ -267,7 +265,10 @@ def main() -> int:
 
     cfg = _load_env()
     if cfg is None:
-        print("\nABORTED: set all required environment variables and retry.", flush=True)
+        print(
+            "\nABORTED: set all required environment variables and retry.",
+            flush=True,
+        )
         return 1
 
     token = authenticate(
@@ -286,7 +287,9 @@ def main() -> int:
     print("\n" + "=" * 50, flush=True)
     print("Summary:", flush=True)
     _print_result("AI rate limit (POST /v1/jobs)", ai_ok, "10 req/min tier")
-    _print_result("General rate limit (POST /v1/workouts)", general_ok, "100 req/min tier")
+    _print_result(
+        "General rate limit (POST /v1/workouts)", general_ok, "100 req/min tier"
+    )
 
     if ai_ok and general_ok:
         print("\nResult: ALL CHECKS PASSED", flush=True)
